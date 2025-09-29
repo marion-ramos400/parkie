@@ -1,8 +1,6 @@
 
 @import './palette.css';
 
-
-
 body {
   background: var(--timberwolf);
 }
