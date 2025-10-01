@@ -1,5 +1,6 @@
 
 import { mount } from '@vue/test-utils'
+import { nextTick } from 'vue'
 import { 
   describe, 
   expect, 
@@ -11,7 +12,7 @@ import Login from '../components/Login/Login.vue'
 
 const wrapper = mount(Login)
 
-test('form exists', () => {
+it('form exists', () => {
   const form = wrapper.find('form')
   expect(form.exists()).toBe(true)
   expect(form.find('input').exists()).toBe(true)
@@ -27,4 +28,28 @@ it('div container class is login', () => {
   expect(div.classes('login')).toBe(true)
 })
 
+it('shows error username required if username field is empty', async () => {
+  wrapper.find('[placeholder="USERNAME"]').setValue('')
+  wrapper.find('[placeholder="PASSWORD"]').setValue('pwd')
+  wrapper.find('form').trigger('submit')
+  await nextTick()
+  expect(wrapper.html()).toContain('Username is required')
+})
+
+it('shows error password required if password field is empty', async () => {
+  wrapper.find('[placeholder="USERNAME"]').setValue('username')
+  wrapper.find('[placeholder="PASSWORD"]').setValue('')
+  wrapper.find('form').trigger('submit')
+  await nextTick()
+  expect(wrapper.html()).toContain('Password is required')
+})
+
+
+it('shows error username and password empty', async () => {
+  wrapper.find('[placeholder="USERNAME"]').setValue('')
+  wrapper.find('[placeholder="PASSWORD"]').setValue('')
+  wrapper.find('form').trigger('submit')
+  await nextTick()
+  expect(wrapper.html()).toContain('Please fill-up the fields')
+})
 
