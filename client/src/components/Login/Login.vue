@@ -11,7 +11,6 @@
       return
     }
     if(!username) {
-      console.log('no username')
       error.value = "Username is required"
     }
     else if(!password) error.value = "Password is required"
