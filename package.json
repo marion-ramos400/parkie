@@ -11,14 +11,16 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "backend": "node server/src/app.js"
+    "backend": "nodemon server/src/app.js"
   },
   "dependencies": {
     "@vue/test-utils": "^2.4.6",
+    "axios": "^1.12.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jest": "^30.2.0",
+    "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.20.0",
     "vue": "^3.5.18"
   },

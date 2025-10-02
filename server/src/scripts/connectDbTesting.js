@@ -10,12 +10,13 @@ const checkConn = async() => {
   console.log('success connect')
   const db = client.db('parkie') 
   const collection = db.collection('users')
-  await collection.insertMany([
-    { username: 'user1', email: 'user1@email.com', bookings: []},
-    { username: 'user2', email: 'user2@email.com', bookings: []},
-    { username: 'user3', email: 'user3@email.com', bookings: []},
-  ])
+//  await collection.insertMany([
+//    { username: 'user1', email: 'user1@email.com', bookings: []},
+//    { username: 'user2', email: 'user2@email.com', bookings: []},
+//    { username: 'user3', email: 'user3@email.com', bookings: []},
+//  ])
   return 'done'
+
 }
 
 checkConn()
