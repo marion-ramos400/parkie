@@ -1,5 +1,7 @@
 <script setup>
   import { ref } from 'vue'
+  import axios from 'axios'
+
   const error = ref(null)
   const username = ref('')
   const pwd = ref('')
@@ -18,6 +20,21 @@
   const handleLogin = (e) => {
     validateUsernamePwd(username.value, pwd.value)
     //TODO add login api call
+    axios.post(
+      'http://localhost:3000/users/login', 
+    {
+      username: username.value,
+      password: pwd.value
+    })
+    .then(res => {
+      //store jwt to session storage
+      sessionStorage.setItem('token', res.data.token)
+    })
+    .catch(err => {
+      console.log(err)
+    })
+    .finally(() => {
+    })
 //    emit('login')
   }
 </script>
