@@ -10,9 +10,7 @@
       error.value = "Please fill-up the fields"
       return
     }
-    if(!username) {
-      error.value = "Username is required"
-    }
+    if(!username) error.value = "Username is required"
     else if(!password) error.value = "Password is required"
     else error.value = ""
   }
