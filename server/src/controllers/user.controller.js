@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken'
 import { User } from '../models/user.models.js'
 import { JWT_SECRET } from '../env.js'
 
@@ -36,9 +37,9 @@ const logInUser = async (req, res) => {
   try {
     const { user } = req.body
     const jwtoken = jwt.sign(
-      {user: user.email, id: user._id}, 
+      { user: user.email, id: user._id }, 
       JWT_SECRET,
-      { "expiration": "10m" }
+      { expiresIn: "10m" }
     )
     res.status(200).json({
       message: 'login successful',

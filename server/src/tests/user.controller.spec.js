@@ -1,5 +1,3 @@
-import mongoose from 'mongoose'
-import { createUser, deleteUser } from '../controllers/user.controller.js'
 import { describe, 
   test, 
   it, 
@@ -9,21 +7,10 @@ import { describe,
   beforeAll,
   afterAll,
   } from 'vitest'
+import mongoose from 'mongoose'
+import { createUser, deleteUser } from '../controllers/user.controller.js'
 import { MONGODB_URI } from '../env.js'
-
-const mockRequest = (sessionData, body) => {
-  return {
-    session: { data: sessionData },
-    body
-  }
-}
-
-const mockResponse = () => {
-  const res = {}
-  res.status = vi.fn((code)=>res)
-  res.json = vi.fn((resdata)=>res)
-  return res
-}
+import { mockRequest, mockResponse } from './mockReqRes.js'
 
 const payload = {
   createUserNonAdmin: {

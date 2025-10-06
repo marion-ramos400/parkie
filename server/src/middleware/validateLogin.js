@@ -11,13 +11,12 @@ const validateLogin = async (req, res, next) => {
     }
     const pwdMatch = await bcrypt.compare(password, user.password)
     if (!pwdMatch) {
-      console.log('wat happened')
       return res.status(400).json({
         msg: 'Invalid credentials'
       })
     }
     //add user for next function
-    req.user = user
+    req.body.user = user
     next()
   }
   catch (error) {

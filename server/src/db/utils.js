@@ -7,6 +7,7 @@ const connectDB = async () => {
       MONGODB_URI, 
       { dbName: DB_NAME }
     )
+    console.log(`successfully connected to db: ${DB_NAME}`)
   }
   catch (error) {
     console.error(

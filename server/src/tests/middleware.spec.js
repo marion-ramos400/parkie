@@ -12,23 +12,8 @@ import { hashPassword } from '../middleware/hashpassword.js'
 import { validateLogin } from '../middleware/validateLogin.js'
 import { createUser, deleteUser } from '../controllers/user.controller.js'
 import { MONGODB_URI } from '../env.js'
-import { mongoose } from 'mongoose'
-
-const mockRequest = (sessionData, body) => {
-  return {
-    session: { data: sessionData },
-    body
-  }
-}
-
-const mockResponse = () => {
-  const res = {}
-  res.status = vi.fn((code)=>res)
-  res.json = vi.fn((resdata)=>res)
-  return res
-}
-
-const mockNext = vi.fn()
+import mongoose from 'mongoose'
+import { mockRequest, mockResponse, mockNext } from './mockReqRes.js'
 
 let payload = {
   shortPassword: {
@@ -108,7 +93,7 @@ describe('middleware', async() => {
     req.body.password = pwdCopy
     await validateLogin(req, res, mockNext)
     expect(mockNext).toHaveBeenCalledTimes(2)
-    expect(req.user.email).toEqual(payload.validateUser.email)
+    expect(req.body.user.email).toEqual(payload.validateUser.email)
   })
 
 })

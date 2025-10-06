@@ -8,10 +8,17 @@ import { describe,
   beforeAll,
   afterAll,
   } from 'vitest'
-import { MONGODB_URI, DB_NAME, BACKEND_URL } from '../env.js'
-import { mongoose } from 'mongoose'
-import { User } from '../models/user.models.js'
+import mongoose from 'mongoose'
 import axios from 'axios'
+import { MONGODB_URI, DB_NAME, BACKEND_URL } from '../env.js'
+import { User } from '../models/user.models.js'
+import { createUser } from '../controllers/user.controller.js'
+import { hashPassword } from '../middleware/hashpassword.js'
+import { connectDB } from '../db/utils.js'
+import { 
+  mockRequest, 
+  mockResponse, 
+  mockNext } from './mockReqRes.js'
 
 const payload = {
   createNonAdmin: {
@@ -28,10 +35,7 @@ const payload = {
 }
 
 const deleteTestUsers = async () => {
-  await mongoose.connect(
-    MONGODB_URI, 
-    { dbName: DB_NAME }
-  )
+  await connectDB()
   await User.deleteOne({ email: payload.createNonAdmin.email })
   await User.deleteOne({ email: payload.createAdmin.email })
 }
@@ -57,6 +61,44 @@ describe('calls /users/create endpoint', () => {
       .finally(() => {
         expect(status).toBe(201)
         expect(data).toHaveProperty('user')
+      })
+  })
+})
+
+describe('calls /users/login endpoint', async () => {
+  let mreq;
+  let mres;
+  beforeEach(async () => {
+    await connectDB()
+    const pCopy = JSON.parse(
+      JSON.stringify(payload.createNonAdmin)
+    )
+    mreq = mockRequest({}, pCopy)
+    mres = mockResponse()
+    await hashPassword(mreq, mres, mockNext)
+    await createUser(mreq, mres)
+  })
+  afterEach(async () => {
+    await deleteTestUsers()
+    vi.clearAllMocks()
+  })
+  it('logs in user through api', async () => {
+    let data;
+    let status;
+    await axios.post(
+        BACKEND_URL + '/users/login',
+        payload.createNonAdmin
+      ) 
+      .then(res => {
+        data = res.data
+        status = res.status
+      })
+      .catch(err => {
+        console.error(err.message)
+      })
+      .finally(() => {
+        expect(status).toBe(200)
+        expect(data).toHaveProperty('token')
       })
   })
 })
