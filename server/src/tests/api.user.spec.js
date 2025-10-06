@@ -48,7 +48,6 @@ describe('calls /users/create endpoint', () => {
       payload.createNonAdmin
       )
       .then(res => {
-        console.log(res.data)
         data = res.data
         status = res.status
       })
