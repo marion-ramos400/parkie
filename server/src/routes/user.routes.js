@@ -1,6 +1,9 @@
 import express from 'express'
 import jwt from 'jsonwebtoken'
 import { JWT_SECRET } from '../env.js'
+import { hashPassword } from '../middleware/hashpassword.js'
+import { createUser } from '../controllers/user.controller.js'
+
 const router = express.Router()
 router.post('/login', (req, res) => {
   //TODO add validation for empty fields
@@ -18,5 +21,7 @@ router.post('/login', (req, res) => {
     }
   )
 })
+
+router.post('create', hashPassword, createUser)
 
 export default router

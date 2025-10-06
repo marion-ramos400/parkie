@@ -31,6 +31,18 @@ const createUser = async (req, res) => {
   }
 }
 
+const logInUser = async (req, res) => {
+  const { email, password } = req.body
+  try {
+    const userExist = await User.findOne({ email });
+      
+  }
+  catch (error) {
+    console.log(error)
+  }
+}
+
+
 const deleteUser = async (req, res) => {
   const { email } = req.body
   try {

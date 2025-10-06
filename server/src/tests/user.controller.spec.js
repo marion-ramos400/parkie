@@ -46,7 +46,7 @@ const clearUsers = async () => {
   }
 }
 
-describe('create user ', async () => {
+describe('controller create user ', async () => {
 
   beforeAll(async () => {
     await mongoose.connect(MONGODB_URI, { dbName: 'parkie' })
@@ -84,4 +84,5 @@ describe('create user ', async () => {
     )
   })
 })
+
 
