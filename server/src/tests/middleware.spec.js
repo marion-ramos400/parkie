@@ -9,6 +9,10 @@ import { describe,
   afterAll,
   } from 'vitest'
 import { hashPassword } from '../middleware/hashpassword.js'
+import { validateLogin } from '../middleware/validateLogin.js'
+import { createUser, deleteUser } from '../controllers/user.controller.js'
+import { MONGODB_URI } from '../env.js'
+import { mongoose } from 'mongoose'
 
 const mockRequest = (sessionData, body) => {
   return {
@@ -34,6 +38,10 @@ let payload = {
   longPassword: {
     email: 'emailTest123456@email.com',
     password: 'thisALong@**paSZWErdRoightHer',
+  },
+  validateUser: {
+    email: 'createDelete@email.com',
+    password: 'validateCreateDelete'
   }
 }
 
@@ -60,15 +68,23 @@ expect.extend({
   }
 })
 
-describe('middleware hashpassword', async() => {
+describe('middleware', async() => {
   let payloadCopy;
+  beforeAll(async () => {
+    await mongoose.connect(MONGODB_URI, { dbName: 'parkie' })
+  })
   beforeEach(() => {
      //deepcopy so that everything disconnected
     payloadCopy = JSON.parse(JSON.stringify(payload))
   })
-  afterEach(() => {
+  afterEach(async () => {
     //put back to orig value
     payload = payloadCopy
+    await deleteUser(
+      mockRequest({}, payload.validateUser),
+      mockResponse()
+    )
+    vi.resetAllMocks()
   })
   it('successfully hashes password', async() => {
     const req = mockRequest({}, payload.shortPassword)
@@ -79,6 +95,23 @@ describe('middleware hashpassword', async() => {
     expect(req.body.password)
       .toHaveLengthGreaterThan(pwdCopy.length)
   })
+
+  it('success validates login credentials', async () => {
+    const req = mockRequest({}, payload.validateUser)
+    const res = mockResponse()
+    const pwdCopy = payload.validateUser.password
+    //create user
+    await hashPassword(req, res, mockNext)
+    await createUser(req, res)
+
+    //reset password to orig value
+    req.body.password = pwdCopy
+    await validateLogin(req, res, mockNext)
+    expect(mockNext).toHaveBeenCalledTimes(2)
+    expect(req.user.email).toEqual(payload.validateUser.email)
+  })
+
 })
+
 
 

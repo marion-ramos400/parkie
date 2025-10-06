@@ -1,4 +1,5 @@
 import { User } from '../models/user.models.js'
+import { JWT_SECRET } from '../env.js'
 
 const createUser = async (req, res) => {
   const { email, password, isAdmin} = req.body
@@ -32,13 +33,22 @@ const createUser = async (req, res) => {
 }
 
 const logInUser = async (req, res) => {
-  const { email, password } = req.body
   try {
-    const userExist = await User.findOne({ email });
-      
+    const { user } = req.body
+    const jwtoken = jwt.sign(
+      {user: user.email, id: user._id}, 
+      JWT_SECRET,
+      { "expiration": "10m" }
+    )
+    res.status(200).json({
+      message: 'login successful',
+      token: jwtoken
+    })
   }
   catch (error) {
-    console.log(error)
+    res.status(500).json({
+      msg: `Error log in user: ${error.message}`
+    })
   }
 }
 
@@ -67,5 +77,6 @@ const deleteUser = async (req, res) => {
 
 export {
   createUser,
+  logInUser,
   deleteUser
 }
