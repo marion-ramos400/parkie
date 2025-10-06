@@ -6,6 +6,7 @@ const {
   JWT_SECRET,
   PORT,
   BACKEND_URL,
+  DB_NAME,
 } = process.env
 
 export {
@@ -13,4 +14,5 @@ export {
   JWT_SECRET,
   PORT,
   BACKEND_URL,
+  DB_NAME,
 }

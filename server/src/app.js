@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { PORT } from './env.js'
-
+import { connectDB } from './db/utils.js'
 import userRoutes from './routes/user.routes.js'
 
 const app = express()
@@ -14,6 +14,16 @@ app.use(express.json())
 app.use(cors())
 app.use('/users', userRoutes)
 
-app.listen(PORT, () => {
-  console.log(`parkie server online on port: ${PORT}`)
-})
+const runServer = async () => {
+  try {
+    await connectDB()
+    app.listen(PORT, () => {
+      console.log(`parkie server online on port: ${PORT}`)
+    })
+  }
+  catch (error) {
+    console.error(`Failed to start server: ${error.message}`)
+  }
+}
+runServer()
+

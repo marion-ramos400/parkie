@@ -6,7 +6,7 @@ import { validateLogin } from '../middleware/validateLogin.js'
 import { createUser, logInUser } from '../controllers/user.controller.js'
 
 const router = express.Router()
-router.post('login', validateLogin, logInUser)
-router.post('create', hashPassword, createUser)
+router.post('/login', validateLogin, logInUser)
+router.post('/create', hashPassword, createUser)
 
 export default router
