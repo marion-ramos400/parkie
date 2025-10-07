@@ -37,9 +37,9 @@ const logInUser = async (req, res) => {
   try {
     const { user } = req.body
     const jwtoken = jwt.sign(
-      { user: user.email, id: user._id }, 
+      { email: user.email, id: user._id }, 
       JWT_SECRET,
-      { expiresIn: "10m" }
+      { expiresIn: "2000" }
     )
     res.status(200).json({
       message: 'login successful',
@@ -76,8 +76,22 @@ const deleteUser = async (req, res) => {
   }
 }
 
+const validateUser = async (req, res) => {
+  const { email, id } = req.body.tokenObj
+  const user = await User.findOne({ email })
+  if (!user) {
+    res.status(404).json({
+      msg: `User not found`
+    })
+  }
+  res.status(200).json({
+    msg: 'User validated'
+  })
+}
+
 export {
   createUser,
   logInUser,
-  deleteUser
+  deleteUser,
+  validateUser
 }

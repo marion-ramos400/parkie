@@ -31,6 +31,10 @@ const payload = {
     password: '1234',
     organization: 'Babadoo Inc',
     isAdmin: true
+  },
+  nonExistentUser: {
+    email: 'nonexistent@pmail.com',
+    password: 'yi(012)123p**'
   }
 }
 
@@ -68,6 +72,7 @@ describe('calls /users/create endpoint', () => {
 describe('calls /users/login endpoint', async () => {
   let mreq;
   let mres;
+  const ENDPOINT = BACKEND_URL + '/users/login'
   beforeEach(async () => {
     await connectDB()
     const pCopy = JSON.parse(
@@ -82,11 +87,12 @@ describe('calls /users/login endpoint', async () => {
     await deleteTestUsers()
     vi.clearAllMocks()
   })
+
   it('logs in user through api', async () => {
     let data;
     let status;
     await axios.post(
-        BACKEND_URL + '/users/login',
+        ENDPOINT,
         payload.createNonAdmin
       ) 
       .then(res => {
@@ -100,6 +106,51 @@ describe('calls /users/login endpoint', async () => {
         expect(status).toBe(200)
         expect(data).toHaveProperty('token')
       })
+  })
+
+  it('sends back 404 for user does not exist', async () => {
+    let data;
+    let status;
+    await axios.post(
+        ENDPOINT,
+        payload.nonExistentUser
+      ) 
+      .then(res => {
+        data = res.data
+        status = res.status
+      })
+      .catch(err => {
+        console.error(err.message)
+        data = err.response.data
+        status = err.response.status
+      })
+      .finally(() => {
+        expect(status).toBe(404)
+        expect(data.msg).toContain('does not exist')
+      })
+  })
+
+  it('sends back 400 for empty login credentials', async () => {
+    let data;
+    let status;
+    await axios.post(
+        ENDPOINT,
+        { email: '', password: ''}
+      ) 
+      .then(res => {
+        data = res.data
+        status = res.status
+      })
+      .catch(err => {
+        console.error(err.message)
+        data = err.response.data
+        status = err.response.status
+      })
+      .finally(() => {
+        expect(status).toBe(400)
+        expect(data.msg).toContain('bad request')
+      })
+
   })
 })
 

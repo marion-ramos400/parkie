@@ -10,10 +10,18 @@ import { describe,
   } from 'vitest'
 import { hashPassword } from '../middleware/hashpassword.js'
 import { validateLogin } from '../middleware/validateLogin.js'
-import { createUser, deleteUser } from '../controllers/user.controller.js'
+import { verifyJwt } from '../middleware/verifyAuth.js'
+import { 
+  createUser, 
+  deleteUser, 
+  logInUser } from '../controllers/user.controller.js'
 import { MONGODB_URI } from '../env.js'
 import mongoose from 'mongoose'
-import { mockRequest, mockResponse, mockNext } from './mockReqRes.js'
+import { 
+  mockRequest, 
+  mockResponse, 
+  mockNext, 
+  sleep } from './mockReqRes.js'
 
 let payload = {
   shortPassword: {
@@ -94,6 +102,54 @@ describe('middleware', async() => {
     await validateLogin(req, res, mockNext)
     expect(mockNext).toHaveBeenCalledTimes(2)
     expect(req.body.user.email).toEqual(payload.validateUser.email)
+  })
+
+  it('successfully verifies jwt', async () => { 
+    const req = mockRequest({}, payload.validateUser)
+    const res = mockResponse()
+    const pwdCopy = payload.validateUser.password
+    //create user
+    await hashPassword(req, res, mockNext)
+    await createUser(req, res)
+
+    //reset password to orig value
+    req.body.password = pwdCopy
+    await validateLogin(req, res, mockNext)
+    await logInUser(req, res)
+    const jwtoken = res.data.token
+
+    //verify token
+    req.headers = {
+      authorization: `Bearer ${jwtoken}`
+    } 
+    await verifyJwt(req, res, mockNext)
+    expect(req.body.tokenObj).toHaveProperty('email')
+  })
+
+  it('throws error when jwt is expired', async () => {
+    const req = mockRequest({}, payload.validateUser)
+    const res = mockResponse()
+    const pwdCopy = payload.validateUser.password
+    //create user
+    await hashPassword(req, res, mockNext)
+    await createUser(req, res)
+
+    //reset password to orig value
+    req.body.password = pwdCopy
+    await validateLogin(req, res, mockNext)
+    await logInUser(req, res)
+    const jwtoken = res.data.token
+    
+    //delay past expiry
+    await sleep(3000)
+    //verify token
+    req.headers = {
+      authorization: `Bearer ${jwtoken}`
+    } 
+    await verifyJwt(req, res, mockNext)
+    expect(res.status).toBeCalledWith(500)
+    expect(res.data.msg).toContain('expired')
+    
   })
 
 })
