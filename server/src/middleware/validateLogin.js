@@ -4,6 +4,11 @@ import { User } from '../models/user.models.js'
 const validateLogin = async (req, res, next) => {
   try {
     const { email, password } = req.body
+    if (!email || !password) {
+      return res.status(400).json({
+        msg: 'bad request, please check email and password fields'
+      })
+    }
     const user = await User.findOne({ email })
     if (!user) {
       return res.status(404).json({ 
