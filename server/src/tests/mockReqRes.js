@@ -19,15 +19,8 @@ const mockResponse = () => {
 
 const mockNext = vi.fn()
 
-const sleep = (ms) => {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms)
-  })
-}
-
 export {
   mockRequest,
   mockResponse,
   mockNext,
-  sleep
 }

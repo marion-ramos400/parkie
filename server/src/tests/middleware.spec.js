@@ -22,6 +22,7 @@ import {
   mockResponse, 
   mockNext, 
   sleep } from './mockReqRes.js'
+import { JWT_EXPIRE } from '../env.js'
 
 let payload = {
   shortPassword: {
@@ -61,14 +62,19 @@ expect.extend({
   }
 })
 
+const execAfterJwtExpire = (callback) => {
+  setTimeout(callback, JWT_EXPIRE)
+}
+
 describe('middleware', async() => {
   let payloadCopy;
   beforeAll(async () => {
     await mongoose.connect(MONGODB_URI, { dbName: 'parkie' })
   })
   beforeEach(() => {
-     //deepcopy so that everything disconnected
+    //deepcopy so that everything disconnected
     payloadCopy = JSON.parse(JSON.stringify(payload))
+    vi.useFakeTimers()
   })
   afterEach(async () => {
     //put back to orig value
@@ -78,6 +84,7 @@ describe('middleware', async() => {
       mockResponse()
     )
     vi.resetAllMocks()
+    vi.restoreAllMocks()
   })
   it('successfully hashes password', async() => {
     const req = mockRequest({}, payload.shortPassword)
@@ -140,18 +147,16 @@ describe('middleware', async() => {
     await logInUser(req, res)
     const jwtoken = res.data.token
     
-    //delay past expiry
-    await sleep(3000)
     //verify token
     req.headers = {
       authorization: `Bearer ${jwtoken}`
     } 
-    await verifyJwt(req, res, mockNext)
+    //verify after timer
+    execAfterJwtExpire(() => verifyJwt(req, res, mockNext))
+    vi.runAllTimers()
     expect(res.status).toBeCalledWith(500)
     expect(res.data.msg).toContain('expired')
-    
   })
-
 })
 
 
