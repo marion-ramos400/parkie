@@ -10,7 +10,8 @@ import { describe,
   } from 'vitest'
 import { hashPassword } from '../middleware/hashpassword.js'
 import { validateLogin } from '../middleware/validateLogin.js'
-import { verifyJwt } from '../middleware/verifyAuth.js'
+import * as tokenAuth from '../middleware/verifyAuth.js'
+//import { tokenAuth.verifyJwt, refreshToken } from ''
 import { 
   createUser, 
   deleteUser, 
@@ -64,6 +65,10 @@ expect.extend({
 
 const execAfterJwtExpire = (callback) => {
   setTimeout(callback, JWT_EXPIRE)
+}
+
+const execAfterSec = (callback, ms) => {
+  setTimeout(callback, ms * 1000)
 }
 
 describe('middleware', async() => {
@@ -129,7 +134,7 @@ describe('middleware', async() => {
     req.headers = {
       authorization: `Bearer ${jwtoken}`
     } 
-    await verifyJwt(req, res, mockNext)
+    await tokenAuth.verifyJwt(req, res, mockNext)
     expect(req.body.tokenObj).toHaveProperty('email')
   })
 
@@ -152,11 +157,76 @@ describe('middleware', async() => {
       authorization: `Bearer ${jwtoken}`
     } 
     //verify after timer
-    execAfterJwtExpire(() => verifyJwt(req, res, mockNext))
+    execAfterJwtExpire(() => tokenAuth.verifyJwt(req, res, mockNext))
     vi.runAllTimers()
     expect(res.status).toBeCalledWith(500)
     expect(res.data.msg).toContain('expired')
   })
+
+  it('successfully refreshes accesstoken', async () => {
+    const req = mockRequest({}, payload.validateUser)
+    const res = mockResponse()
+    const pwdCopy = payload.validateUser.password
+    //create user
+    await hashPassword(req, res, mockNext)
+    await createUser(req, res)
+
+    //reset password to orig value
+    req.body.password = pwdCopy
+    await validateLogin(req, res, mockNext)
+    await logInUser(req, res)
+    const jwtoken = res.data.token
+    
+    //verify token
+    req.headers = {
+      authorization: `Bearer ${jwtoken}`
+    } 
+    req.cookies = {
+      refreshToken: res.data.refreshToken
+    }
+
+    //refresh after timer
+    execAfterSec(async () => {
+      await tokenAuth.refreshToken(req, res)
+      expect(res.status).toBeCalledWith(201)
+      expect(res.data.msg).toContain('refreshed')
+    }, 5)
+    vi.runAllTimers()
+  })
+
+  it('throws error when refresh token is expired', async () => {
+    const req = mockRequest({}, payload.validateUser)
+    const res = mockResponse()
+    const pwdCopy = payload.validateUser.password
+    //create user
+    await hashPassword(req, res, mockNext)
+    await createUser(req, res)
+
+    //reset password to orig value
+    req.body.password = pwdCopy
+    await validateLogin(req, res, mockNext)
+    await logInUser(req, res)
+    const jwtoken = res.data.token
+    console.log(res.data)
+    
+    //verify token
+    req.headers = {
+      authorization: `Bearer ${jwtoken}`
+    } 
+    req.cookies = {
+      refreshToken: res.data.refreshToken
+    }
+
+    //refresh after timer
+    execAfterSec(async () => {
+      await tokenAuth.refreshToken(req, res)
+      console.log(res.data)
+      expect(res.status).toBeCalledWith(401)
+      expect(res.data.msg).toContain('expired')
+    }, 14 * 60 * 60)
+    vi.runAllTimers()
+  })
+
 })
 
 

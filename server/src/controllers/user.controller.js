@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { User } from '../models/user.models.js'
-import { JWT_SECRET, JWT_EXPIRE } from '../env.js'
+import { JWT_SECRET, JWT_EXPIRE, REFRESH_SECRET, REFRESH_EXPIRE } from '../env.js'
 
 const createUser = async (req, res) => {
   const { email, password, isAdmin} = req.body
@@ -36,14 +36,41 @@ const createUser = async (req, res) => {
 const logInUser = async (req, res) => {
   try {
     const { user } = req.body
+    const tokenData = { 
+        email: user.email, 
+        id: user._id,
+        dt: Date.now()
+
+    }
     const jwtoken = jwt.sign(
-      { email: user.email, id: user._id }, 
+      tokenData, 
       JWT_SECRET,
       { expiresIn: JWT_EXPIRE }
     )
+    const refreshToken = jwt.sign(
+      tokenData, 
+      REFRESH_SECRET,
+      { expiresIn: REFRESH_EXPIRE }
+    )
+    
+    await User.updateOne({ email: user.email }, { refreshToken })
+    res.cookie("accessToken", jwtoken, {
+      httpOnly: true,
+      secure: false, //TODO set to true for production
+      maxAge: 15 * 60 * 1000,//TODO parse this from JWT_EXPIRE: 15min
+      sameSite: "strict"
+    })
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false, //TODO set to true for production
+      maxAge: 12 * 60 * 60 * 1000,//TODO parse this from REFRESH_EXPIRE: 12h
+      sameSite: "strict"
+    })
+
     res.status(200).json({
       message: 'login successful',
-      token: jwtoken
+      token: jwtoken,
+      refreshToken: refreshToken
     })
   }
   catch (error) {

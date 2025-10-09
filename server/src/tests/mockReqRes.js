@@ -3,7 +3,7 @@ import { vi } from 'vitest'
 const mockRequest = (sessionData, body) => {
   return {
     session: { data: sessionData },
-    body
+    body,
   }
 }
 
@@ -14,6 +14,11 @@ const mockResponse = () => {
     res.data = resdata
     return res
   })
+  res.cookie = vi.fn(
+    (cookieName, cookieData, options)=>{
+      return res
+    }
+  )
   return res
 }
 
