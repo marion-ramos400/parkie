@@ -3,6 +3,7 @@
   import axios from 'axios'
   import { useRouter } from 'vue-router'
   import { VITE_PARKIE_SERVER } from '@/env.js'
+  import { apiLoginUser } from '@/api/api.users.js'
 
   const error = ref(null)
   const email = ref('')
@@ -10,31 +11,15 @@
   const emit = defineEmits(['login'])
   const router = useRouter()
 
-  const handleLogin = (e) => {
-    //TODO add login api call
-    axios.post(
-      VITE_PARKIE_SERVER + '/users/login', 
-    {
-      email: email.value,
-      password: pwd.value
-    },
-    {
-      withCredentials: true
-    })
-    .then(res => {
-      console.log(res)
-      if (res.status === 200){
-        //store jwt to session storage
-        sessionStorage.setItem('token', res.data.token)
-        router.push('/dashboard')
-      }
-    })
-    .catch(err => {
-      console.error(err)
-    })
-    .finally(() => {
-    })
-//    emit('login')
+  const handleLogin = async (e) => {
+    await apiLoginUser(
+        email.value, pwd.value
+      )
+      .then(resData => {
+        if (resData) {
+          router.push('/dashboard')
+        }
+      })
   }
 </script>
 <template>

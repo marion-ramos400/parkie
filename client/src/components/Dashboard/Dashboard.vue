@@ -2,32 +2,24 @@
   import { ref } from 'vue'
   import axios from 'axios'
   import { VITE_PARKIE_SERVER } from '@/env.js'
+  import { 
+   apiRefreshUser, 
+   apiVerifyJwt,
+   apiLogOutUser } from '@/api/api.users.js'
 
   const email = ref('')
-  const testPost = (endpoint) => {
-    axios.post(
-      endpoint, {}, 
-      { withCredentials: true }
-      )
-      .then(res => {
-        console.log(res)
-      })
-      .catch(error => {
-        console.error(error.message)
-      })
+
+  const verifyJwt = async () => {
+    await apiVerifyJwt().then(data=>console.log(data))
   }
 
-  const verifyJwt = () => {
-    //TODO make axios instance for DRY
-    testPost(VITE_PARKIE_SERVER + '/users/verify')
+  const refreshJwt = async () => {
+    await apiRefreshUser().then(data=>console.log(data))
   }
 
-  const refreshJwt = () => {
-    testPost(VITE_PARKIE_SERVER + '/users/refresh')
-  }
-
-  const logOut = () => {
-    testPost(VITE_PARKIE_SERVER + '/users/logout')
+  const logOut = async () => {
+    //remove cookies
+    await apiLogOutUser().then(data=>console.log(data))
   }
 
 </script>
