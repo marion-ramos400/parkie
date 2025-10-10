@@ -4,7 +4,7 @@ import { User } from '../models/user.models.js'
 
 const verifyJwt = (req, res, next) => {
   try {
-    const token = req.headers.authorization.split(' ')[1]
+    const token = req.cookies.accessToken
     if (!token) {
       return res.status(401).json({
         msg: 'Token not found'
@@ -34,7 +34,7 @@ const refreshToken = async (req, res) => {
     }
     
     if (user.refreshToken !== refreshToken) {
-      //token should be gone hen logged out
+      //token should be gone when logged out
       return res.status(401).json({
         msg: `Invalid refresh token`
       })
@@ -60,9 +60,10 @@ const refreshToken = async (req, res) => {
     )
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
-      secure: false, //TODO set to true for production
+      secure: true, //TODO set to true for production
       maxAge: 15 * 60 * 1000,//TODO parse this from JWT_EXPIRE: 15min
-      sameSite: "strict"
+      sameSite: "None",
+      partitioned: true,
     })
     return res.status(201).json({
       msg: "Access token refreshed",

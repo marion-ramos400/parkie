@@ -56,15 +56,17 @@ const logInUser = async (req, res) => {
     await User.updateOne({ email: user.email }, { refreshToken })
     res.cookie("accessToken", jwtoken, {
       httpOnly: true,
-      secure: false, //TODO set to true for production
+      secure: true, //TODO set to true for production
       maxAge: 15 * 60 * 1000,//TODO parse this from JWT_EXPIRE: 15min
-      sameSite: "strict"
+      sameSite: "None",
+      partitioned: true,
     })
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: false, //TODO set to true for production
+      secure: true, //TODO set to true for production
       maxAge: 12 * 60 * 60 * 1000,//TODO parse this from REFRESH_EXPIRE: 12h
-      sameSite: "strict"
+      sameSite: "None",
+      partitioned: true,
     })
 
     res.status(200).json({
@@ -76,6 +78,21 @@ const logInUser = async (req, res) => {
   catch (error) {
     res.status(500).json({
       msg: `Error log in user: ${error.message}`
+    })
+  }
+}
+
+const logOutUser = async (req, res) => {
+  try {
+    const tokenObj = jwt.verify(req.cookies.refreshToken, REFRESH_SECRET)
+    await User.updateOne({ _id: tokenObj.id }, { refreshToken: '' })
+    return res.status(200).json({
+      msg: 'User logged out'
+    })
+  }
+  catch (error) {
+    res.status(500).json({
+      msg: 'logout error verifying refresh token'
     })
   }
 }
@@ -119,6 +136,7 @@ const validateUser = async (req, res) => {
 export {
   createUser,
   logInUser,
+  logOutUser,
   deleteUser,
   validateUser
 }

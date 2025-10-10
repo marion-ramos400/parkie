@@ -12,7 +12,7 @@ app.get('/', (req, res) => {
 })
 
 app.use(express.json())
-app.use(cors())
+app.use(cors({ origin: true, credentials: true }))
 app.use(cookieParser())
 app.use('/users', userRoutes)
 

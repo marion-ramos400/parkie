@@ -4,12 +4,13 @@ import { JWT_SECRET } from '../env.js'
 import { hashPassword } from '../middleware/hashpassword.js'
 import { validateLogin } from '../middleware/validateLogin.js'
 import { verifyJwt, refreshToken } from '../middleware/verifyAuth.js'
-import { createUser, logInUser, validateUser } from '../controllers/user.controller.js'
+import { createUser, logInUser, logOutUser, validateUser } from '../controllers/user.controller.js'
 
 const router = express.Router()
 router.post('/login', validateLogin, logInUser)
 router.post('/create', hashPassword, createUser)
 router.post('/verify', verifyJwt, validateUser)
 router.post('/refresh', refreshToken)
+router.post('/logout', logOutUser)
 
 export default router

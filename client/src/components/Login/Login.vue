@@ -1,41 +1,38 @@
 <script setup>
   import { ref } from 'vue'
   import axios from 'axios'
+  import { useRouter } from 'vue-router'
+  import { VITE_PARKIE_SERVER } from '@/env.js'
 
   const error = ref(null)
-  const username = ref('')
+  const email = ref('')
   const pwd = ref('')
   const emit = defineEmits(['login'])
-
-  const validateUsernamePwd = (username, password) => {
-    if(!username && !password){
-      error.value = "Please fill-up the fields"
-      return
-    }
-    if(!username) error.value = "Username is required"
-    else if(!password) error.value = "Password is required"
-    else error.value = ""
-  }
+  const router = useRouter()
 
   const handleLogin = (e) => {
-    validateUsernamePwd(username.value, pwd.value)
     //TODO add login api call
     axios.post(
-      'http://127.0.0.1:3000/users/login', 
+      VITE_PARKIE_SERVER + '/users/login', 
     {
-      email: username.value,
+      email: email.value,
       password: pwd.value
+    },
+    {
+      withCredentials: true
     })
     .then(res => {
-      //store jwt to session storage
-      sessionStorage.setItem('token', res.data.token)
+      console.log(res)
+      if (res.status === 200){
+        //store jwt to session storage
+        sessionStorage.setItem('token', res.data.token)
+        router.push('/dashboard')
+      }
     })
     .catch(err => {
-      console.log('captured error')
       console.error(err)
     })
     .finally(() => {
-      console.log('huuuh?')
     })
 //    emit('login')
   }
@@ -44,14 +41,16 @@
   <div class="login">
     <div>
       <h3>Login</h3>
-      <form v-on:submit.prevent="handlelogin">
+      <form v-on:submit.prevent="handleLogin">
         <input 
           type="text" 
-          placeholder="username"
-          v-model="username"/>
+          placeholder="email"
+          required=true
+          v-model="email"/>
         <input 
           type="password" 
           placeholder="password"
+          required=true
           v-model="pwd"/>
         <button type="submit">login</button>
       </form>
