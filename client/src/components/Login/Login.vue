@@ -21,9 +21,9 @@
     validateUsernamePwd(username.value, pwd.value)
     //TODO add login api call
     axios.post(
-      'http://localhost:3000/users/login', 
+      'http://127.0.0.1:3000/users/login', 
     {
-      username: username.value,
+      email: username.value,
       password: pwd.value
     })
     .then(res => {
@@ -31,9 +31,11 @@
       sessionStorage.setItem('token', res.data.token)
     })
     .catch(err => {
-      console.log(err)
+      console.log('captured error')
+      console.error(err)
     })
     .finally(() => {
+      console.log('huuuh?')
     })
 //    emit('login')
   }
@@ -42,21 +44,22 @@
   <div class="login">
     <div>
       <h3>Login</h3>
-      <form v-on:submit.prevent="handleLogin">
+      <form v-on:submit.prevent="handlelogin">
         <input 
           type="text" 
-          placeholder="USERNAME"
+          placeholder="username"
           v-model="username"/>
         <input 
           type="password" 
-          placeholder="PASSWORD"
+          placeholder="password"
           v-model="pwd"/>
-        <button type="submit">Login</button>
+        <button type="submit">login</button>
       </form>
       <div class="forgot-password">
-        <a href="">Forgot Password</a>
+        <a href="">forgot password</a>
         <p v-if="error">{{ error }}</p>
       </div>
+      <RouterLink to="/dashboard">dash</RouterLink>
     </div>
   </div>
 </template>

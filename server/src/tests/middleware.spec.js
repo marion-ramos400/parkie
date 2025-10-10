@@ -207,7 +207,6 @@ describe('middleware', async() => {
     await validateLogin(req, res, mockNext)
     await logInUser(req, res)
     const jwtoken = res.data.token
-    console.log(res.data)
     
     //verify token
     req.headers = {
@@ -220,7 +219,6 @@ describe('middleware', async() => {
     //refresh after timer
     execAfterSec(async () => {
       await tokenAuth.refreshToken(req, res)
-      console.log(res.data)
       expect(res.status).toBeCalledWith(401)
       expect(res.data.msg).toContain('expired')
     }, 14 * 60 * 60)

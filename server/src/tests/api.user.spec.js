@@ -44,16 +44,18 @@ const deleteTestUsers = async () => {
   await User.deleteOne({ email: payload.createAdmin.email })
 }
 
-describe('calls /users/create endpoint', () => {
+describe('calls /users/create endpoint', async () => {
   afterEach(async () => {
     await deleteTestUsers()
+    vi.resetAllMocks()
+    vi.restoreAllMocks()
   })
   it('creates non admin user through api', async () => {
     let data;
     let status;
     await axios.post(
-      BACKEND_URL + '/users/create',
-      payload.createNonAdmin
+        BACKEND_URL + '/users/create',
+        payload.createNonAdmin
       )
       .then(res => {
         data = res.data
@@ -120,7 +122,6 @@ describe('calls /users/login endpoint', async () => {
         status = res.status
       })
       .catch(err => {
-        console.error(err.message)
         data = err.response.data
         status = err.response.status
       })

@@ -1,11 +1,11 @@
-<script setup>
-import Login from '@/components/Login/Login.vue'
-   
+<script>
 </script>
 
 <template>
   <section class="container">
-    <Login/>
+    <main>
+      <RouterView/>
+    </main>
   </section>
 </template>
 
