@@ -18,7 +18,6 @@
   }
 
   const logOut = async () => {
-    //remove cookies
     await apiLogOutUser().then(data=>console.log(data))
   }
 
