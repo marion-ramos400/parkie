@@ -6,7 +6,9 @@
   const email = ref('')
   const testPost = (endpoint) => {
     axios.post(
-      endpoint, {}, { withCredentials: true })
+      endpoint, {}, 
+      { withCredentials: true }
+      )
       .then(res => {
         console.log(res)
       })

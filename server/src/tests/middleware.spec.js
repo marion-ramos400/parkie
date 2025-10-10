@@ -131,9 +131,9 @@ describe('middleware', async() => {
     const jwtoken = res.data.token
 
     //verify token
-    req.headers = {
-      authorization: `Bearer ${jwtoken}`
-    } 
+    req.cookies = {
+      accessToken: jwtoken
+    }
     await tokenAuth.verifyJwt(req, res, mockNext)
     expect(req.body.tokenObj).toHaveProperty('email')
   })
