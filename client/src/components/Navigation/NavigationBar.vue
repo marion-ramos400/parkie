@@ -1,7 +1,6 @@
 <script setup>
   import { ref, reactive } from 'vue'
   import { useRouter } from 'vue-router'
-  import { apiLogOutUser } from '@/api/api.users.js'
   
   const router = useRouter()
   const navMenu = reactive({
@@ -17,25 +16,21 @@
       url: "/dashboard/office",
       text: "Office"
     },
-//    logout: {
-//      url: "/",
-//      text: "LogOut"
-//    },
+    logout: {
+      url: "/",
+      text: "Log Out"
+    }
   })
 
-  const logout = async (e) => {
-    await apiLogOutUser() 
-    router.push('/')
-  }
 </script>
 <template>
   <div class="navbar">
     <RouterLink 
       v-for="item in navMenu" 
-      :to="item.url">
+      :to="item.url"
+      activeClass="active">
     {{ item.text }}
     </RouterLink>
-    <button @click="logout">Log Out</button>
   </div>
 </template>
 <style>
@@ -43,7 +38,7 @@
     margin: 0;
     padding: 0;
     width: 200px;
-    background-color: red;
+    background-color: var(--cambridge-blue-2);
     position: fixed;
     left: 0;
     top: 0;
@@ -53,6 +48,20 @@
 
   .navbar a {
     display: block;
+    text-decoration: none;
+    color: black;
+    font-size: 20px;
+    padding: 24px;
+  }
+
+  .navbar a.active {
+    background: var(--hunter-green);
+    color: white;
+  }
+
+  .navbar a:hover:not(.active) {
+    background: var(--onyx);
+    color: white;
   }
 
   @media screen and (max-width: 700px) {

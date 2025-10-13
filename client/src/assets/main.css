@@ -1,6 +1,11 @@
 
 @import './palette.css';
+@import url('https://fonts.googleapis.com/css2?family=Arimo&display=swap');
 
 body {
   background: var(--timberwolf);
+  font-family: Arimo;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
