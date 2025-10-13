@@ -1,12 +1,12 @@
 <script setup>
-  import { ref, reactive } from 'vue'
+  import { ref, reactive, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
   
   const router = useRouter()
   const navMenu = reactive({
     home: {
       url: "/dashboard/home",
-      text: "Home"
+      text: "Home",
     },
     parking: {
       url: "/dashboard/parking",
@@ -20,6 +20,9 @@
       url: "/",
       text: "Log Out"
     }
+  })
+  onMounted(() => {
+    router.push(navMenu.home.url)
   })
 
 </script>

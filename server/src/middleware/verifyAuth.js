@@ -12,7 +12,12 @@ const verifyJwt = (req, res, next) => {
     }
     //should throw error if invalid, expired etc
     const tokenObj = jwt.verify(token, JWT_SECRET)
-    req.body.tokenObj = tokenObj
+    if (!req.body) { //for get req
+      req.body = { tokenObj }
+    }
+    else { // for post req
+      req.body.tokenObj = tokenObj
+    }
     next()
   }
   catch (error) {

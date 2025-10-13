@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { apiPost } from './api.utils.js'
+import { apiPost, apiGet } from './api.utils.js'
 import { VITE_PARKIE_SERVER } from '../env.js'
 
 const instance = axios.create({
@@ -43,9 +43,18 @@ const apiLogOutUser = async () => {
   )
 }
 
+const apiGetUser = async () => {
+  return await apiGet(
+    instance,
+    '/get',
+    'apiGetUser'
+  )
+}
+
 export {
   apiLoginUser,
   apiVerifyJwt,
   apiRefreshUser,
-  apiLogOutUser
+  apiLogOutUser,
+  apiGetUser,
 }

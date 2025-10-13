@@ -52,7 +52,6 @@ const logInUser = async (req, res) => {
       REFRESH_SECRET,
       { expiresIn: REFRESH_EXPIRE }
     )
-    
     await User.updateOne({ email: user.email }, { refreshToken })
     res.cookie("accessToken", jwtoken, {
       httpOnly: true,
@@ -135,10 +134,26 @@ const validateUser = async (req, res) => {
   })
 }
 
+const getUser = async (req, res) => {
+  const { email, id } = req.body.tokenObj
+  const user = await User.findOne({ email })
+  if (!user) {
+    res.status(404).json({
+      msg: `User not found`
+    })
+  }
+  res.status(200).json({
+    email: user.email,
+    bookings: user.bookings,
+    msg: 'User found'
+  })
+}
+
 export {
   createUser,
   logInUser,
   logOutUser,
   deleteUser,
-  validateUser
+  validateUser,
+  getUser,
 }

@@ -18,6 +18,7 @@ const routes = [
     path: '/dashboard', 
     components: {
       MainContentView: Dashboard
+
     },
     children: [
       {
