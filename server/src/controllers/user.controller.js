@@ -86,8 +86,8 @@ const logOutUser = async (req, res) => {
   try {
     const tokenObj = jwt.verify(req.cookies.refreshToken, REFRESH_SECRET)
     await User.updateOne({ _id: tokenObj.id }, { refreshToken: '' })
-    res.clearCookie('accessToken')
-    res.clearCookie('refreshToken')
+    res.clearCookie('accessToken', { partitioned: true })
+    res.clearCookie('refreshToken', { partitioned: true })
     return res.status(200).json({
       msg: 'User logged out'
     })

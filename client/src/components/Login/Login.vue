@@ -43,7 +43,6 @@
         <a href="">forgot password</a>
         <p v-if="error">{{ error }}</p>
       </div>
-      <RouterLink to="/dashboard">dash</RouterLink>
     </div>
   </div>
 </template>

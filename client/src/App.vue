@@ -4,7 +4,7 @@
 <template>
   <section class="container">
     <main>
-      <RouterView/>
+      <RouterView name="MainContentView"/>
     </main>
   </section>
 </template>
