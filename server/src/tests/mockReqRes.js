@@ -8,7 +8,7 @@ const mockRequest = (sessionData, body) => {
 }
 
 const mockResponse = () => {
-  const res = {}
+  const res = { cookies: {} }
   res.status = vi.fn((code)=>res)
   res.json = vi.fn((resdata)=>{
     res.data = resdata
@@ -16,6 +16,7 @@ const mockResponse = () => {
   })
   res.cookie = vi.fn(
     (cookieName, cookieData, options)=>{
+      res.cookies[cookieName] = cookieData
       return res
     }
   )

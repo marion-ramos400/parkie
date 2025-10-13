@@ -1,15 +1,19 @@
 import jwt from 'jsonwebtoken'
 import { User } from '../models/user.models.js'
-import { JWT_SECRET, JWT_EXPIRE, REFRESH_SECRET, REFRESH_EXPIRE } from '../env.js'
+import * as env from '../env.js'
+import Cookies from '../utils/cookies.js'
+import Send from '../utils/response.js'
 
 const createUser = async (req, res) => {
   const { email, password, isAdmin} = req.body
   try {
     const userExist = await User.findOne({ email });
     if (userExist) {
-      return res.status(400).json({ 
-        msg: `User Email ${email} already exists`
-      })
+      return Send.badRequest(
+        res,
+        null,
+        `User Email ${email} already exists`
+      )
     }
     const newUser = await User.create({
       email,
@@ -17,19 +21,21 @@ const createUser = async (req, res) => {
       isAdmin: isAdmin ? isAdmin : false
     })
     const adminStr = isAdmin ? 'Admin ' : ''
-    res.status(201).json({
-      msg: `${adminStr}User created successfully`,
+    const outUser = {
       user: {
         id: newUser._id,
         email: newUser.email,
         isAdmin: newUser.isAdmin,
       }
-    })
+    }
+    Send.created(
+      res, 
+      outUser,
+      `${adminStr}User created successfully`,
+    )
   }
   catch (error) {
-    res.status(500).json({
-      msg: `ERROR: ${error}`
-    })
+    Send.error(res, null, `error createUser: ${error.message}`)
   }
 }
 
@@ -44,57 +50,35 @@ const logInUser = async (req, res) => {
     }
     const jwtoken = jwt.sign(
       tokenData, 
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRE }
+      env.JWT_SECRET,
+      { expiresIn: env.JWT_EXPIRE }
     )
     const refreshToken = jwt.sign(
       tokenData, 
-      REFRESH_SECRET,
-      { expiresIn: REFRESH_EXPIRE }
+      env.REFRESH_SECRET,
+      { expiresIn: env.REFRESH_EXPIRE }
     )
     await User.updateOne({ email: user.email }, { refreshToken })
-    res.cookie("accessToken", jwtoken, {
-      httpOnly: true,
-      secure: true, //TODO set to true for production
-      maxAge: 15 * 60 * 1000,//TODO parse this from JWT_EXPIRE: 15min
-      sameSite: "None",
-      partitioned: true,
-    })
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: true, //TODO set to true for production
-      maxAge: 12 * 60 * 60 * 1000,//TODO parse this from REFRESH_EXPIRE: 12h
-      sameSite: "None",
-      partitioned: true,
-    })
-
-    res.status(200).json({
-      message: 'login successful',
-      token: jwtoken,
-      refreshToken: refreshToken
-    })
+    Cookies.set(res, "accessToken", jwtoken, env.JWT_MAX_AGE)
+    Cookies.set(res, "refreshToken", refreshToken, env.REFRESH_MAX_AGE)
+    
+    Send.success(res, null, 'login success')
   }
   catch (error) {
-    res.status(500).json({
-      msg: `Error log in user: ${error.message}`
-    })
+    Send.error(res, null, `Error log in user: ${error.message}`)
   }
 }
 
 const logOutUser = async (req, res) => {
   try {
-    const tokenObj = jwt.verify(req.cookies.refreshToken, REFRESH_SECRET)
+    const tokenObj = jwt.verify(req.cookies.refreshToken, env.REFRESH_SECRET)
     await User.updateOne({ _id: tokenObj.id }, { refreshToken: '' })
-    res.clearCookie('accessToken', { partitioned: true })
-    res.clearCookie('refreshToken', { partitioned: true })
-    return res.status(200).json({
-      msg: 'User logged out'
-    })
+    Cookies.clear(res, 'accessToken')
+    Cookies.clear(res, 'refreshToken')
+    Send.success(res, null, msg='User logged out')
   }
   catch (error) {
-    res.status(500).json({
-      msg: 'logout error verifying refresh token'
-    })
+    Send.error(res, null, 'logout error verifying refresh token')
   }
 }
 
@@ -104,20 +88,14 @@ const deleteUser = async (req, res) => {
   try {
     const deleteUser = await User.deleteOne({ email })
     if (deleteUser.deletedCount < 1) {
-      res.status(404).json({
-        msg: `user email: ${email} not found`
-      })
+      Send.notFound(res, null, `user email: ${email} not found`)
     }
     else {
-      res.status(200).json({
-        msg: `user ${email} deleted`
-      })
+      Send.success(res, null, `user ${email} deleted`)
     }
   }
   catch (error) {
-    res.status(500).json({
-      msg: `ERROR: ${error}`
-    })
+    Send.error(res, null, `error deleteUser: ${error.message}`)
   }
 }
 
@@ -125,28 +103,22 @@ const validateUser = async (req, res) => {
   const { email, id } = req.body.tokenObj
   const user = await User.findOne({ email })
   if (!user) {
-    res.status(404).json({
-      msg: `User not found`
-    })
+    return Send.notFound(res, null, msg='User not found')
   }
-  res.status(200).json({
-    msg: 'User validated'
-  })
+  Send.success(res, null, msg=`User validated`)
 }
 
 const getUser = async (req, res) => {
   const { email, id } = req.body.tokenObj
   const user = await User.findOne({ email })
   if (!user) {
-    res.status(404).json({
-      msg: `User not found`
-    })
+    return Send.notFound(res, null, msg='User not found')
   }
-  res.status(200).json({
-    email: user.email,
-    bookings: user.bookings,
-    msg: 'User found'
-  })
+  const {refreshToken, ...outProps} = user
+  const outUser = {...outProps}
+  Send.success(res, 
+    outUser,
+    msg=`User found`)
 }
 
 export {

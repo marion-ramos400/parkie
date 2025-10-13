@@ -10,8 +10,7 @@ import { describe,
   } from 'vitest'
 import { hashPassword } from '../middleware/hashpassword.js'
 import { validateLogin } from '../middleware/validateLogin.js'
-import * as tokenAuth from '../middleware/verifyAuth.js'
-//import { tokenAuth.verifyJwt, refreshToken } from ''
+import Auth from '../middleware/auth.js'
 import { 
   createUser, 
   deleteUser, 
@@ -128,13 +127,12 @@ describe('middleware', async() => {
     req.body.password = pwdCopy
     await validateLogin(req, res, mockNext)
     await logInUser(req, res)
-    const jwtoken = res.data.token
-
+    const jwtoken = res.cookies.accessToken
     //verify token
     req.cookies = {
       accessToken: jwtoken
     }
-    await tokenAuth.verifyJwt(req, res, mockNext)
+    await Auth.verifyJwt(req, res, mockNext)
     expect(req.body.tokenObj).toHaveProperty('email')
   })
 
@@ -157,7 +155,7 @@ describe('middleware', async() => {
       authorization: `Bearer ${jwtoken}`
     } 
     //verify after timer
-    execAfterJwtExpire(() => tokenAuth.verifyJwt(req, res, mockNext))
+    execAfterJwtExpire(() => Auth.verifyJwt(req, res, mockNext))
     vi.runAllTimers()
     expect(res.status).toBeCalledWith(500)
     expect(res.data.msg).toContain('expired')
@@ -175,19 +173,15 @@ describe('middleware', async() => {
     req.body.password = pwdCopy
     await validateLogin(req, res, mockNext)
     await logInUser(req, res)
-    const jwtoken = res.data.token
+    const refreshToken = res.cookies.refreshToken
     
-    //verify token
-    req.headers = {
-      authorization: `Bearer ${jwtoken}`
-    } 
     req.cookies = {
-      refreshToken: res.data.refreshToken
+      refreshToken
     }
 
     //refresh after timer
     execAfterSec(async () => {
-      await tokenAuth.refreshToken(req, res)
+      await Auth.refreshToken(req, res)
       expect(res.status).toBeCalledWith(201)
       expect(res.data.msg).toContain('refreshed')
     }, 5)
@@ -206,19 +200,15 @@ describe('middleware', async() => {
     req.body.password = pwdCopy
     await validateLogin(req, res, mockNext)
     await logInUser(req, res)
-    const jwtoken = res.data.token
+    const refreshToken = res.cookies.refreshToken
     
-    //verify token
-    req.headers = {
-      authorization: `Bearer ${jwtoken}`
-    } 
     req.cookies = {
-      refreshToken: res.data.refreshToken
+      refreshToken
     }
 
     //refresh after timer
     execAfterSec(async () => {
-      await tokenAuth.refreshToken(req, res)
+      await Auth.refreshToken(req, res)
       expect(res.status).toBeCalledWith(401)
       expect(res.data.msg).toContain('expired')
     }, 14 * 60 * 60)
