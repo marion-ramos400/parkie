@@ -8,21 +8,15 @@ import { describe,
   beforeAll,
   afterAll,
   } from 'vitest'
+import mongoose from 'mongoose'
 import { hashPassword } from '../middleware/hashpassword.js'
 import { validateLogin } from '../middleware/validateLogin.js'
+import { connectDB } from '../db/utils.js'
+import { JWT_MAX_AGE, REFRESH_MAX_AGE } from '../env.js'
 import Auth from '../middleware/auth.js'
-import { 
-  createUser, 
-  deleteUser, 
-  logInUser } from '../controllers/user.controller.js'
-import { MONGODB_URI } from '../env.js'
-import mongoose from 'mongoose'
-import { 
-  mockRequest, 
-  mockResponse, 
-  mockNext, 
-  sleep } from './mockReqRes.js'
-import { JWT_EXPIRE } from '../env.js'
+import UserController from '../controllers/user.controller.js'
+import Mock from './mock.js'
+import { TestUtilsUser } from './utils.js'
 
 let payload = {
   shortPassword: {
@@ -62,18 +56,16 @@ expect.extend({
   }
 })
 
-const execAfterJwtExpire = (callback) => {
-  setTimeout(callback, JWT_EXPIRE)
-}
-
-const execAfterSec = (callback, ms) => {
-  setTimeout(callback, ms * 1000)
+const execAftermSec = (callback, ms) => {
+  setTimeout(callback, ms)
 }
 
 describe('middleware', async() => {
+  const userControl = new UserController()
+  const mock = new Mock()
   let payloadCopy;
   beforeAll(async () => {
-    await mongoose.connect(MONGODB_URI, { dbName: 'parkie' })
+    await connectDB()
   })
   beforeEach(() => {
     //deepcopy so that everything disconnected
@@ -83,135 +75,82 @@ describe('middleware', async() => {
   afterEach(async () => {
     //put back to orig value
     payload = payloadCopy
-    await deleteUser(
-      mockRequest({}, payload.validateUser),
-      mockResponse()
+    await userControl.delete(
+      mock.request(payload.validateUser),
+      mock.response()
     )
     vi.resetAllMocks()
     vi.restoreAllMocks()
+    mock.clear()
   })
   it('successfully hashes password', async() => {
-    const req = mockRequest({}, payload.shortPassword)
-    const res = mockResponse()
+    const req = mock.request(payload.shortPassword)
+    const res = mock.response()
     const pwdCopy = payload.shortPassword.password
-    await hashPassword(req, res, mockNext)
-    expect(mockNext).toBeCalledTimes(1)
+    await hashPassword(req, res, mock.next)
+    expect(mock.next).toBeCalledTimes(1)
     expect(req.body.password)
       .toHaveLengthGreaterThan(pwdCopy.length)
   })
 
   it('success validates login credentials', async () => {
-    const req = mockRequest({}, payload.validateUser)
-    const res = mockResponse()
+    const req = mock.request(payload.validateUser)
+    const res = mock.response()
     const pwdCopy = payload.validateUser.password
     //create user
-    await hashPassword(req, res, mockNext)
-    await createUser(req, res)
+    await hashPassword(req, res, mock.next)
+    await userControl.create(req, res)
 
     //reset password to orig value
     req.body.password = pwdCopy
-    await validateLogin(req, res, mockNext)
-    expect(mockNext).toHaveBeenCalledTimes(2)
+    await validateLogin(req, res, mock.next)
+    expect(mock.next).toHaveBeenCalledTimes(2)
     expect(req.body.user.email).toEqual(payload.validateUser.email)
   })
 
   it('successfully verifies jwt', async () => { 
-    const req = mockRequest({}, payload.validateUser)
-    const res = mockResponse()
-    const pwdCopy = payload.validateUser.password
-    //create user
-    await hashPassword(req, res, mockNext)
-    await createUser(req, res)
-
-    //reset password to orig value
-    req.body.password = pwdCopy
-    await validateLogin(req, res, mockNext)
-    await logInUser(req, res)
-    const jwtoken = res.cookies.accessToken
+    const testUtilsUser = new TestUtilsUser(payload.validateUser, mock)
+    const [req, res] = await testUtilsUser.createThenLogin()
     //verify token
-    req.cookies = {
-      accessToken: jwtoken
-    }
-    await Auth.verifyJwt(req, res, mockNext)
+    req.cookies = { accessToken: res.cookies.accessToken }
+    await Auth.verifyJwt(req, res, mock.next)
     expect(req.body.tokenObj).toHaveProperty('email')
   })
 
   it('throws error when jwt is expired', async () => {
-    const req = mockRequest({}, payload.validateUser)
-    const res = mockResponse()
-    const pwdCopy = payload.validateUser.password
-    //create user
-    await hashPassword(req, res, mockNext)
-    await createUser(req, res)
-
-    //reset password to orig value
-    req.body.password = pwdCopy
-    await validateLogin(req, res, mockNext)
-    await logInUser(req, res)
-    const jwtoken = res.data.token
-    
-    //verify token
-    req.headers = {
-      authorization: `Bearer ${jwtoken}`
-    } 
+    const testUtilsUser = new TestUtilsUser(payload.validateUser, mock)
+    const [req, res] = await testUtilsUser.createThenLogin()
+    req.cookies = { accessToken: res.cookies.accessToken }
     //verify after timer
-    execAfterJwtExpire(() => Auth.verifyJwt(req, res, mockNext))
+    execAftermSec(() => Auth.verifyJwt(req, res, mock.next), JWT_MAX_AGE)
     vi.runAllTimers()
     expect(res.status).toBeCalledWith(500)
     expect(res.data.msg).toContain('expired')
   })
 
   it('successfully refreshes accesstoken', async () => {
-    const req = mockRequest({}, payload.validateUser)
-    const res = mockResponse()
-    const pwdCopy = payload.validateUser.password
-    //create user
-    await hashPassword(req, res, mockNext)
-    await createUser(req, res)
-
-    //reset password to orig value
-    req.body.password = pwdCopy
-    await validateLogin(req, res, mockNext)
-    await logInUser(req, res)
-    const refreshToken = res.cookies.refreshToken
-    
-    req.cookies = {
-      refreshToken
-    }
-
+    const testUtilsUser = new TestUtilsUser(payload.validateUser, mock)
+    const [req, res] = await testUtilsUser.createThenLogin()
+    req.cookies = { refreshToken: res.cookies.refreshToken }
     //refresh after timer
-    execAfterSec(async () => {
+    execAftermSec(async () => {
       await Auth.refreshToken(req, res)
       expect(res.status).toBeCalledWith(201)
       expect(res.data.msg).toContain('refreshed')
-    }, 5)
+    }, REFRESH_MAX_AGE - 1000)
     vi.runAllTimers()
   })
 
   it('throws error when refresh token is expired', async () => {
-    const req = mockRequest({}, payload.validateUser)
-    const res = mockResponse()
-    const pwdCopy = payload.validateUser.password
-    //create user
-    await hashPassword(req, res, mockNext)
-    await createUser(req, res)
-
-    //reset password to orig value
-    req.body.password = pwdCopy
-    await validateLogin(req, res, mockNext)
-    await logInUser(req, res)
-    const refreshToken = res.cookies.refreshToken
-    
-    req.cookies = {
-      refreshToken
-    }
-
+    const testUtilsUser = new TestUtilsUser(payload.validateUser, mock)
+    const [req, res] = await testUtilsUser.createThenLogin()
+    req.cookies = { refreshToken: res.cookies.refreshToken }
     //refresh after timer
-    execAfterSec(async () => {
+    execAftermSec(async () => {
       await Auth.refreshToken(req, res)
       expect(res.status).toBeCalledWith(401)
       expect(res.data.msg).toContain('expired')
-    }, 14 * 60 * 60)
+    }, REFRESH_MAX_AGE)
     vi.runAllTimers()
   })
 

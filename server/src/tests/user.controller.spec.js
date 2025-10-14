@@ -7,10 +7,9 @@ import { describe,
   beforeAll,
   afterAll,
   } from 'vitest'
-import mongoose from 'mongoose'
-import { createUser, deleteUser } from '../controllers/user.controller.js'
-import { MONGODB_URI } from '../env.js'
-import { mockRequest, mockResponse } from './mockReqRes.js'
+import { connectDB } from '../db/utils.js'
+import UserController from '../controllers/user.controller.js'
+import Mock from './mock.js'
 
 const payload = {
   createUserNonAdmin: {
@@ -25,30 +24,30 @@ const payload = {
 }
 
 const clearUsers = async () => {
-  for (let p in payload) {
-    await deleteUser(
-      mockRequest({}, payload[p]),
-      mockResponse()
-    )
-  }
 }
 
 describe('controller create user ', async () => {
+  const userControl = new UserController()
+  const mock = new Mock()
 
   beforeAll(async () => {
-    await mongoose.connect(MONGODB_URI, { dbName: 'parkie' })
+    await connectDB()
   })
 
   afterEach(async () => {
-    await clearUsers()
+    mock.clear()
+    for (let p in payload) {
+      await userControl.delete(
+        mock.request(payload[p]),
+        mock.response()
+      )
+    }
   }) 
   
   it('creates non admin user', async () => {
-    const req = mockRequest(
-      {},
-      payload.createUserNonAdmin)
-    const res = mockResponse()
-    await createUser(req, res)
+    const req = mock.request(payload.createUserNonAdmin)
+    const res = mock.response()
+    await userControl.create(req, res)
     expect(res.status).toHaveBeenCalledWith(201)
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -58,11 +57,9 @@ describe('controller create user ', async () => {
   })
 
   it('creates admin user', async () => {
-    const req = mockRequest(
-      {},
-      payload.createUserAdmin)
-    const res = mockResponse()
-    await createUser(req, res)
+    const req = mock.request(payload.createUserAdmin)
+    const res = mock.response()
+    await userControl.create(req, res)
     expect(res.status).toHaveBeenCalledWith(201)
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({

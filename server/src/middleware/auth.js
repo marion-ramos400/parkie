@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken'
 import * as env from '../env.js'
 import { User } from '../models/user.models.js'
-import Cookies from '../utils/cookies.js'
-import Send from '../utils/response.js'
+import Cookies from '../http/cookies.js'
+import Send from '../http/response.js'
 
 class Auth {
   static async verifyJwt(req, res, next) {

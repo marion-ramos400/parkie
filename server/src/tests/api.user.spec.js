@@ -10,15 +10,12 @@ import { describe,
   } from 'vitest'
 import mongoose from 'mongoose'
 import axios from 'axios'
-import { MONGODB_URI, DB_NAME, BACKEND_URL } from '../env.js'
+import { BACKEND_URL } from '../env.js'
 import { User } from '../models/user.models.js'
-import { createUser } from '../controllers/user.controller.js'
+import UserController from '../controllers/user.controller.js'
 import { hashPassword } from '../middleware/hashpassword.js'
 import { connectDB } from '../db/utils.js'
-import { 
-  mockRequest, 
-  mockResponse, 
-  mockNext } from './mockReqRes.js'
+import Mock from './mock.js'
 
 const payload = {
   createNonAdmin: {
@@ -72,6 +69,8 @@ describe('calls /users/create endpoint', async () => {
 })
 
 describe('calls /users/login endpoint', async () => {
+  const mock = new Mock()
+  const userControl = new UserController()
   let mreq;
   let mres;
   const ENDPOINT = BACKEND_URL + '/users/login'
@@ -80,13 +79,14 @@ describe('calls /users/login endpoint', async () => {
     const pCopy = JSON.parse(
       JSON.stringify(payload.createNonAdmin)
     )
-    mreq = mockRequest({}, pCopy)
-    mres = mockResponse()
-    await hashPassword(mreq, mres, mockNext)
-    await createUser(mreq, mres)
+    mreq = mock.request(pCopy)
+    mres = mock.response()
+    await hashPassword(mreq, mres, mock.next)
+    await userControl.create(mreq, mres)
   })
   afterEach(async () => {
     await deleteTestUsers()
+    mock.clear()
     vi.clearAllMocks()
   })
 
@@ -106,7 +106,6 @@ describe('calls /users/login endpoint', async () => {
       })
       .finally(() => {
         expect(status).toBe(200)
-//        expect(data).toHaveProperty('token')
       })
   })
 
