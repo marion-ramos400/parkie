@@ -12,6 +12,9 @@ class MResponse {
       this.cookies[cookieName] = cookieData
       return this
     })
+    this.clearCookie = vi.fn((cookieName, options) => {
+      return this
+    })
   }
 }
 

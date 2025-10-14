@@ -22,17 +22,17 @@ class TestUtilsUser {
     await this.userControl.create(this.req, this.res)
     //reset password to orig value
     this.req.body.password = this.pwdCopy
-    return this 
+    return [this.req, this.res]
   }
 
   async validateUserLogin() {
     await validateLogin(this.req, this.res, this.next)
-    return this 
+    return [this.req, this.res]
   }
   
   async loginUser() {
     await this.userControl.login(this.req, this.res)
-    return this 
+    return [this.req, this.res]
   }
 
   async createThenLogin() {

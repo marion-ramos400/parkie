@@ -42,8 +42,8 @@ class UserController extends InterfaceController {
   }
 
   async delete(req, res) {
-    const { email } = req.body
     try {
+      const { email } = req.body
       const deleteUser = await User.deleteOne({ email })
       if (deleteUser.deletedCount < 1) {
         Send.notFound(res, null, `user email: ${email} not found`)
@@ -58,29 +58,39 @@ class UserController extends InterfaceController {
   }
 
   async validate(req, res) {
-    const { email, id } = req.body.tokenObj
-    const user = await User.findOne({ email })
-    if (!user) {
-      return Send.notFound(res, null, 'User not found')
+    try {
+      const { email, id } = req.body.tokenObj
+      const user = await User.findOne({ email })
+      if (!user) {
+        return Send.notFound(res, null, 'User not found')
+      }
+      Send.success(res, null, `User validated`)
     }
-    Send.success(res, null, `User validated`)
+    catch (error) {
+      Send.error(res, null, `error validateUser: ${error.message}`)
+    }
   }
 
   async get(req, res) {
-    const { email, id } = req.body.tokenObj
-    const user = await User.findOne({ email })
-    if (!user) {
-      return Send.notFound(res, null, 'User not found')
+    try {
+      const { email, id } = req.body.tokenObj
+      const user = await User.findOne({ email })
+      if (!user) {
+        return Send.notFound(res, null, 'User not found')
+      }
+      const outUser = {
+        id: user._id,
+        email: user.email,
+        bookings: user.bookings,
+        isAdmin: user.isAdmin
+      }
+      Send.success(res, 
+        outUser,
+        `User found`)
     }
-    const outUser = {
-      id: user._id,
-      email: user.email,
-      bookings: user.bookings,
-      isAdmin: user.isAdmin
+    catch (error) {
+      Send.error(res, null, `error getUser: ${error.message}`)
     }
-    Send.success(res, 
-      outUser,
-      `User found`)
   }
 
   async login(req, res) {
