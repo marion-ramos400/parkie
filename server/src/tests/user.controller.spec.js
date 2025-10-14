@@ -23,9 +23,6 @@ const payload = {
   }
 }
 
-const clearUsers = async () => {
-}
-
 describe('controller create user ', async () => {
   const userControl = new UserController()
   const mock = new Mock()
