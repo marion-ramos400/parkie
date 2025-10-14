@@ -1,4 +1,5 @@
-import { describe, 
+import { 
+  describe, 
   test, 
   it, 
   expect, 
@@ -16,6 +17,7 @@ import UserController from '../controllers/user.controller.js'
 import { hashPassword } from '../middleware/hashpassword.js'
 import { connectDB } from '../db/utils.js'
 import Mock from './mock.js'
+import HTTP from '../http/codes.js'
 
 const payload = {
   createNonAdmin: {
@@ -62,7 +64,7 @@ describe('calls /users/create endpoint', async () => {
         console.error(err.message)
       })
       .finally(() => {
-        expect(status).toBe(201)
+        expect(status).toBe(HTTP.CREATED)
         expect(data).toHaveProperty('user')
       })
   })
@@ -105,7 +107,7 @@ describe('calls /users/login endpoint', async () => {
         console.error(err.message)
       })
       .finally(() => {
-        expect(status).toBe(200)
+        expect(status).toBe(HTTP.SUCCESS)
       })
   })
 
@@ -125,7 +127,7 @@ describe('calls /users/login endpoint', async () => {
         status = err.response.status
       })
       .finally(() => {
-        expect(status).toBe(404)
+        expect(status).toBe(HTTP.NOT_FOUND)
         expect(data.msg).toContain('does not exist')
       })
   })
@@ -147,7 +149,7 @@ describe('calls /users/login endpoint', async () => {
         status = err.response.status
       })
       .finally(() => {
-        expect(status).toBe(400)
+        expect(status).toBe(HTTP.BAD_REQUEST)
         expect(data.msg).toContain('bad request')
       })
 

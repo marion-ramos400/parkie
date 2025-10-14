@@ -17,6 +17,7 @@ import Auth from '../middleware/auth.js'
 import UserController from '../controllers/user.controller.js'
 import Mock from './mock.js'
 import { TestUtilsUser } from './utils.js'
+import HTTP from '../http/codes.js'
 
 let payload = {
   shortPassword: {
@@ -124,7 +125,7 @@ describe('middleware', async() => {
     //verify after timer
     execAftermSec(() => Auth.verifyJwt(req, res, mock.next), JWT_MAX_AGE)
     vi.runAllTimers()
-    expect(res.status).toBeCalledWith(500)
+    expect(res.status).toBeCalledWith(HTTP.ERROR)
     expect(res.data.msg).toContain('expired')
   })
 
@@ -135,7 +136,7 @@ describe('middleware', async() => {
     //refresh after timer
     execAftermSec(async () => {
       await Auth.refreshToken(req, res)
-      expect(res.status).toBeCalledWith(201)
+      expect(res.status).toBeCalledWith(HTTP.CREATED)
       expect(res.data.msg).toContain('refreshed')
     }, REFRESH_MAX_AGE - 1000)
     vi.runAllTimers()
@@ -148,7 +149,7 @@ describe('middleware', async() => {
     //refresh after timer
     execAftermSec(async () => {
       await Auth.refreshToken(req, res)
-      expect(res.status).toBeCalledWith(401)
+      expect(res.status).toBeCalledWith(HTTP.UNAUTHORIZED)
       expect(res.data.msg).toContain('expired')
     }, REFRESH_MAX_AGE)
     vi.runAllTimers()
