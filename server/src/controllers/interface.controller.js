@@ -1,4 +1,5 @@
 
+
 export default class InterfaceController {
   async create(req, res) {
     throw new Error('No implementation for create method') 
