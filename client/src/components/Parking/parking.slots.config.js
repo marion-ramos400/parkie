@@ -8,26 +8,40 @@ const rowMaker = (startX, startY, numRows) => {
   for (let i=0; i<numRows; i++)  {
     const posX = i === 0 ? startX + i*width 
       : startX + i*width + i*spacing
-      row.push(
-        {
-          x: posX,
-          y: startY,
-          w: width,
-          h: height,
-          booked: false,
-//          id: "slot" + i.toString()
-        }
-      )
+    
+    const tempIsBooked = true ? i % 2 == 0 : false
+    row.push(
+      {
+        floor: 1,
+        name: 'A' + (i+1).toString(),
+        dateBooked: '',
+        datePark: '',
+        start: '',
+        end: '',
+        ticketNum: '',
+        reservedTo: 'tester',
+        qrCode: {},
+        isBooked: tempIsBooked,
+        uiRect: 
+          {
+            x: posX,
+            y: startY,
+            w: width,
+            h: height,
+          }
+      }
+    )
   }
   return row
 }
 
-let row1 = rowMaker(730, 20, 15)
-let row2 = rowMaker(608, 152, 4)
-let row3 = rowMaker(817, 152, 14)
-let row4 = rowMaker(608, 212, 4)
+let row1 = rowMaker(144, 4, 15)
+let row2 = rowMaker(24, 138, 4)
+let row3 = rowMaker(232, 138, 14)
+//let row4 = rowMaker(608, 414, 4)
+//let row5 = rowMaker(817, 414, 14)
 
-const tempParkingSlots = row1.concat(row2).concat(row3).concat(row4)
+const tempParkingSlots = row1.concat(row2).concat(row3)
 let i = 0
 const parkingSlots = tempParkingSlots.map(
   item => {

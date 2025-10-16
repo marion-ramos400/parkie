@@ -1,13 +1,14 @@
 <script setup>
   import { ref, useTemplateRef, onMounted } from 'vue'
-  import { VITE_PARKING_FLOORPLAN} from '@/env.js'
+  import { VITE_PARKING_FLOORPLAN } from '@/env.js'
   import parkingSlots from './parking.slots.config.js'
   import ParkingSlot from '@/components/Parking/ParkingSlot.vue'
-
+  
   const floorplan = useTemplateRef('floorplan')
   const slots = ref([])
   const checkPos = (e) => {
-    console.log(e.pageX, e.pageY)
+//    console.log(e.pageX, e.pageY)
+//    console.log(floorplan._value.getBoundingClientRect())
   }
   const pSlots = ref(parkingSlots)
 
@@ -16,7 +17,7 @@
   <h1>Parking</h1>
   <div ref="floorplan" class='floorplan' v-on:click="checkPos">
     <ParkingSlot v-for="slot in pSlots"
-      v-bind="slot"
+      :slot="slot"
     />
     <img :src="VITE_PARKING_FLOORPLAN" alt=""
       width="752px" height="615px">
@@ -25,6 +26,7 @@
 </template>
 <style>
   .floorplan {
+    position: relative;
     width: 752px;
     height: 615px;
   }

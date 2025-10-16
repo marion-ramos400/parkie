@@ -4,6 +4,7 @@ import Login from '@/components/Login/Login.vue'
 import Dashboard from '@/components/Dashboard/Dashboard.vue'
 import Home from '@/components/Home/Home.vue'
 import Parking from '@/components/Parking/Parking.vue'
+import ParkingAdmin from '@/components/Parking/ParkingAdmin.vue'
 import Office from '@/components/Office/Office.vue'
 
 const routes = [
