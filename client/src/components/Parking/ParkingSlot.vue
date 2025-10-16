@@ -1,20 +1,28 @@
 <script setup>
   import { ref, onMounted } from 'vue'
+
   const props = defineProps([
     'slot'
+  ])
+  const emit = defineEmits([
+    'confirmPrompt'
   ])
 
   const isBooked = ref(false)
   
   const bookSlot = () => {
     if (isBooked.value) return;
-    console.log('init book process')
+    const { uiRect } = props.slot
+    const { w, h } = uiRect
+    const xpos = uiRect.x + w/2
+    const ypos = uiRect.y + h/2
+    emit('confirmPrompt', { x: xpos, y: ypos, show: true })
   }
   
   const parseStyle = (uiRect) => {
     const { x, y, w, h } = uiRect
-    return `top:${y}px`
-      + `;left:${x}px`
+    return `left:${x}px`
+      + `;top:${y}px`
       + `;width:${w}px`
       + `;height:${h}px`
   }
@@ -23,9 +31,10 @@
     isBooked.value = props.slot.isBooked
   })
 
+
 </script>
 <template>
-  <div class="vacant"
+  <div class="slot"
        :class="{ booked: isBooked }"
        :style="parseStyle(slot.uiRect)"
        v-on:click="bookSlot"
@@ -34,13 +43,6 @@
 </template>
 <style>
   .slot {
-    display: block;
-    position: absolute;
-    background-color: var(--islamic-green);
-    z-index: 100;
-  }
-
-  .vacant {
     display: block;
     position: absolute;
     background-color: var(--black-olive);
