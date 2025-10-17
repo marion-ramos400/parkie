@@ -24,7 +24,6 @@
     />
 
   <PromptBookConfirm 
-    v-if="promptConfirm.show"
     :position="promptConfirm"
     @confirm-prompt="(arg) => showPromptConfirm(arg)"
     />
