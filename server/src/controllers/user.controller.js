@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { User } from '../models/user.models.js'
+import { User } from '../models/models.js'
 import * as env from '../env.js'
 import Cookies from '../http/cookies.js'
 import Send from '../http/response.js'

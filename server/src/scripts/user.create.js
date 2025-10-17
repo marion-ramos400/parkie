@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
-import { User } from '../models/user.models.js'
+import { User } from '../models/models.js'
 import { connectDB } from '../db/utils.js'
 
 await connectDB()

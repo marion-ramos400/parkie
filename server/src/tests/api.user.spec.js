@@ -12,7 +12,7 @@ import {
 import mongoose from 'mongoose'
 import axios from 'axios'
 import { BACKEND_URL } from '../env.js'
-import { User } from '../models/user.models.js'
+import { User } from '../models/models.js'
 import UserController from '../controllers/user.controller.js'
 import { hashPassword } from '../middleware/hashpassword.js'
 import { connectDB } from '../db/utils.js'
