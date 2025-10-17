@@ -20,7 +20,6 @@
 
 
   onMounted(async () => {
-    console.log(props.position.x)
   })
 </script>
 <template>

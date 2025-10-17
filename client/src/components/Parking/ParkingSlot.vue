@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, onMounted } from 'vue'
+  import { ref, onMounted, computed } from 'vue'
 
   const props = defineProps([
     'slot'
@@ -9,6 +9,7 @@
   ])
 
   const isBooked = ref(false)
+  const isHover = ref(false)
   
   const bookSlot = () => {
     if (isBooked.value) return;
@@ -27,17 +28,28 @@
       + `;height:${h}px`
   }
 
+  const hoverColor = (active) => {
+    if (isBooked.value) return;
+    isHover.value = active; 
+  }
+
+  const setDivColor = computed(() => {
+    if (isHover.value) return "hovered";
+    if (isBooked.value) return "booked";
+  })
+
   onMounted(async () => {
     isBooked.value = props.slot.isBooked
   })
 
-
 </script>
 <template>
   <div class="slot"
-       :class="{ booked: isBooked }"
+       :class="setDivColor"
        :style="parseStyle(slot.uiRect)"
        v-on:click="bookSlot"
+       v-on:mouseover="()=>hoverColor(true)"
+       v-on:mouseout="()=>hoverColor(false)"
        >
   </div>
 </template>
@@ -52,5 +64,9 @@
 
   .booked {
     background-color: var(--coral-pink);
+  }
+
+  .hovered {
+    background-color: var(--celadon);
   }
 </style>
