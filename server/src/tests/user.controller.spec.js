@@ -9,7 +9,7 @@ import { describe,
   afterAll,
   } from 'vitest'
 import { connectDB } from '../db/utils.js'
-import UserController from '../controllers/user.controller.js'
+import { UserController } from '../controllers/controllers.js'
 import Mock from './mock.js'
 import HTTP from '../http/codes.js'
 import { TestUtilsUser } from './utils.js'

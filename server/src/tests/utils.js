@@ -1,7 +1,7 @@
 
 import { hashPassword } from '../middleware/hashpassword.js'
 import { validateLogin } from '../middleware/validateLogin.js'
-import UserController from '../controllers/user.controller.js'
+import { UserController } from '../controllers/controllers.js'
 import Auth from '../middleware/auth.js'
 
 class TestUtilsUser {
