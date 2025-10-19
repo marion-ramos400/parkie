@@ -35,6 +35,11 @@ class MockFloorPlan extends MockTestObject {
         floor: 1,
         building: 'Shimmy Tower',
         slots: new MockSlotTestObjects().slots5Unbooked()
+      },
+      floorPlanNoName: {
+        floor: 1,
+        building: 'Shimmy Tower',
+        slots: new MockSlotTestObjects().slots5Unbooked()
       }
     }
   }

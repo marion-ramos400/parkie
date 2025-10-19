@@ -40,8 +40,16 @@ describe('controller floorplan', async () => {
     const req = mockhttp.request(mFloorPlan.payload().floorPlan1Shimmy)
     const res = mockhttp.response()
     await fpControl.create(req, res) 
-    console.log(res.data)
     expect(res.status).toHaveBeenCalledWith(HTTP.CREATED)
     expect(res.data.msg).toContain('created')
+  })
+
+  it('throws error name parameter required', async () => {
+    const req = mockhttp.request(mFloorPlan.payload().floorPlanNoName)
+    const res = mockhttp.response()
+    await fpControl.create(req, res) 
+    expect(res.status).toHaveBeenCalledWith(HTTP.ERROR)
+    expect(res.data.msg).toContain('Path `name` is required')
+
   })
 })
