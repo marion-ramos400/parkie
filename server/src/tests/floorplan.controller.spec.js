@@ -14,12 +14,14 @@ import { FloorPlanController } from '../controllers/controllers.js'
 import { MockFloorPlan } from './mock.payload.js'
 import Mock from './mock.js'
 
+const delay = ms => new Promise(res => setTimeout(res, ms));
 
 describe('controller floorplan', async () => {
   let mockhttp;
   let mFloorPlan;
   let fpControl = new FloorPlanController()
   const deleteMockObjects = async () => {
+    await delay(100)
     for(const [key, value] of Object.entries(mFloorPlan.payload())) {
       await fpControl.delete(mockhttp.request(value), mockhttp.response())
     }
@@ -50,6 +52,27 @@ describe('controller floorplan', async () => {
     await fpControl.create(req, res) 
     expect(res.status).toHaveBeenCalledWith(HTTP.ERROR)
     expect(res.data.msg).toContain('Path `name` is required')
-
   })
+
+  it('successfully retrieves floorplan with filter floor and building', async () => {
+    const req = mockhttp.request(mFloorPlan.payload().floorPlan1Shimmy)
+    const res = mockhttp.response()
+    await fpControl.create(req, res) 
+
+    req.query = mFloorPlan.query().bldgShimmyFlr1
+    await fpControl.get(req, res)
+    expect(res.status).toHaveBeenLastCalledWith(HTTP.SUCCESS)
+    expect(res.data).toHaveProperty('name')
+  })
+
+  it('returns not found when floorplan not exist', async () => {
+    const req = mockhttp.request(mFloorPlan.payload().floorPlan1Shimmy)
+    const res = mockhttp.response()
+    req.query = mFloorPlan.query().bldgShimmyFlr1
+    await fpControl.get(req, res)
+    expect(res.status).toHaveBeenLastCalledWith(HTTP.NOT_FOUND)
+    expect(res.data.msg).toContain('not found')
+  })
+
+
 })

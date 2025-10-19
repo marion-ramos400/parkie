@@ -43,6 +43,11 @@ class MockFloorPlan extends MockTestObject {
       }
     }
   }
+  query() {
+    return {
+      bldgShimmyFlr1: "building=Shimmy%20Tower&floor=1"
+    }
+  }
 }
 
 class MockSlot extends MockTestObject {

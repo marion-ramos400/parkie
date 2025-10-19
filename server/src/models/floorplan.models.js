@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { slotSchema } from './slot.models.js'
+import { Slot, slotSchema } from './slot.models.js'
 const floorplanSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -15,6 +15,13 @@ const floorplanSchema = new mongoose.Schema({
     default: ''
   },
   slots: [slotSchema]
+})
+
+floorplanSchema.pre('deleteOne', async function(next) {
+  const flrPlanId = this.getQuery()._id
+  const items = await Slot.find({ floorplan: flrPlanId})
+  const res = await Slot.deleteMany({ floorplan: flrPlanId })
+  next()
 })
 
 const FloorPlan = mongoose.model('FloorPlan', floorplanSchema)

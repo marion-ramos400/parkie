@@ -1,4 +1,3 @@
-
 import mongoose from 'mongoose'
 const slotSchema = new mongoose.Schema({
   name: {
@@ -26,9 +25,11 @@ const slotSchema = new mongoose.Schema({
     required: true,
     default: false
   },
-  uiRect: {
-    type: Map,
-    of: mongoose.Schema.Types.Int32 //x, y, w, h
+  uiRect: Object,
+  floorplan: {
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'FloorPlan',
+    required: true,
   }
 })
 
