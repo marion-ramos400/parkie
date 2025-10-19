@@ -47,8 +47,33 @@ class FloorPlanController extends InterfaceController {
     }
   }
 
-//  async update(req, res) {
-//  }
+  async update(req, res) {
+    try {
+      const { name, slots } = req.body
+      const floorplan = await FloorPlan.findOne({ name })
+      if (!floorplan) {
+        return Send.notFound(res, null, 'floorplan not found')
+      }
+      let newSlots = []
+      for (let i = 0; i < slots.length; i++) {
+        slots[i].floorplan = floorplan
+        const item = await Slot.create(slots[i])
+        newSlots.push(item)
+      }
+      const { modifiedCount } = await FloorPlan.updateOne({ name }, { slots: newSlots })
+      if (modifiedCount < 1) {
+        return Send.notFound(
+          res, { modifiedCount },
+          `Unable to modify floorplan: ${name}`
+        )
+      }
+      Send.success(res, null, 'Successfully updated floorplan')
+    }
+    catch (err) {
+      Send.errorMsg(res, `Error updating floorplan: ${err.message}`)
+    }
+  }
+
   async delete(req, res) {
     try {
       const { name } = req.body

@@ -20,6 +20,10 @@ class Send {
     setResponse(res, HTTP.ERROR, data, msg)
     return
   }
+  static errorMsg(res, msg) {
+    setResponse(res, HTTP.ERROR, null, msg)
+    return
+  }
   static notFound(res, data, msg = "not found") {
     setResponse(res, HTTP.NOT_FOUND, data, msg)
     return
