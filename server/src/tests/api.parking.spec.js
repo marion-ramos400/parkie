@@ -18,7 +18,7 @@ describe('api router parking', async () => {
   it('returns status: ok', async () => {
     let response;
     await axios.get(
-      BACKEND_URL + '/parking/test'
+      BACKEND_URL + '/parking/test?wut=hello&heyhey=wasap'
       )
       .then(res => response = res)
       .catch(err => console.error(err.message))

@@ -1,8 +1,13 @@
 import mongoose from 'mongoose'
 import { slotSchema } from './slot.models.js'
 const floorplanSchema = new mongoose.Schema({
-  floor: {
+  name: {
     type: String,
+    required: true,
+    unique: true
+  },
+  floor: {
+    type: mongoose.Schema.Types.Int32,
     required: true,
   },
   building: {

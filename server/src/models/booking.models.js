@@ -2,8 +2,13 @@ import mongoose from 'mongoose'
 import { slotSchema } from './slot.models.js'
 
 const bookingSchema = new mongoose.Schema({
-  floor: {
+  ticketnum: {
     type: String,
+    required: true,
+    unique: true
+  },
+  floor: {
+    type: mongoose.Schema.Types.Int32,
     required: true,
   },
   company: {
@@ -29,11 +34,6 @@ const bookingSchema = new mongoose.Schema({
   },
   to: {
     type: Date
-  },
-  ticketnum: {
-    type: String,
-    required: true,
-    unique: true
   },
   slot: {
     type: slotSchema
