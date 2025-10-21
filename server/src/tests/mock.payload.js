@@ -68,6 +68,16 @@ class MockSlot extends MockTestObject {
   json() {
     return JSON.parse(JSON.stringify(this))
   }
+  payload() {
+    return {
+      slotExist: {
+        name: 'A1'
+      },
+      slotNotExist: {
+        name: 'BediBadoo'
+      }
+    }
+  }
 }
 
 class MockBooking extends MockTestObject{
