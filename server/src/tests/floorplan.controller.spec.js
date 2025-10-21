@@ -12,20 +12,14 @@ import { connectDB } from '../db/utils.js'
 import HTTP from '../http/codes.js'
 import { FloorPlanController } from '../controllers/controllers.js'
 import { MockFloorPlan } from './mock.payload.js'
+import { deleteMockPayloadDb } from './utils.js'
 import Mock from './mock.js'
-
-const delay = ms => new Promise(res => setTimeout(res, ms));
 
 describe('controller floorplan', async () => {
   let mockhttp;
   let mFloorPlan;
   let fpControl = new FloorPlanController()
-  const deleteMockObjects = async () => {
-    await delay(100)
-    for(const [key, value] of Object.entries(mFloorPlan.payload())) {
-      await fpControl.delete(mockhttp.request(value), mockhttp.response())
-    }
-  }
+
   beforeAll( async () => {
     await connectDB()
   })
@@ -34,8 +28,7 @@ describe('controller floorplan', async () => {
     mFloorPlan = new MockFloorPlan()
   })
   afterEach(async () => {
-//    console.dir(mFloorPlan.payload(), { depth: null })
-    await deleteMockObjects()
+    await deleteMockPayloadDb(mFloorPlan.payload(), fpControl)
   })
 
   it('successfully creates floorplan', async () => {
@@ -89,7 +82,7 @@ describe('controller floorplan', async () => {
       mFloorPlan.payload().overwriteSlots.slots[0])
   })
 
-  it('fails update returns not found when floorplan not exist, and slots remain unedited', async () => {
+  it('fails update returns not found when floorplan not exist and slots remain unedited', async () => {
     let req = mockhttp.request(mFloorPlan.payload().towerOneFlr1)
     const res = mockhttp.response()
     await fpControl.create(req, res)

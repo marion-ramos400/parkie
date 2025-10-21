@@ -1,8 +1,33 @@
 
 import { hashPassword } from '../middleware/hashpassword.js'
 import { validateLogin } from '../middleware/validateLogin.js'
-import { UserController } from '../controllers/controllers.js'
+import { 
+  UserController,
+  FloorPlanController
+} from '../controllers/controllers.js'
 import Auth from '../middleware/auth.js'
+import Mock from './mock.js'
+
+class TestUtils {
+  constructor(controller, payload=null) {
+    this.mock = new Mock()
+    this.req = payload ? this.mock.request(payload) : null
+    this.res = this.mock.response()
+    this.controller = controller
+    this.next = this.mock.next
+  }
+
+  async create(payload) {
+    if (payload) {
+      this.req = this.mock.request(payload)
+    }
+    await this.controller.create(this.req, this.res) 
+  }
+
+  async delete() {
+    await this.controller.delete(this.req, this.res)
+  }
+}
 
 class TestUtilsUser {
   constructor(payload, mock) {
@@ -44,6 +69,19 @@ class TestUtilsUser {
   }
 }
 
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+const deleteMockPayloadDb = async (payloadsObj, controller) => {
+  const mockhttp = new Mock()
+  await delay(100) 
+  for(const [key, value] of Object.entries(payloadsObj)) {
+    await controller.delete(mockhttp.request(value), mockhttp.response())
+  }
+}
+
 export {
-  TestUtilsUser
+  TestUtils,
+  TestUtilsUser,
+  deleteMockPayloadDb,
+  delay,
 }

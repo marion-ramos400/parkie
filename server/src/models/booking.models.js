@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import { slotSchema } from './slot.models.js'
+import { floorplanSchema } from './floorplan.models.js'
 
 const bookingSchema = new mongoose.Schema({
   ticketnum: {
@@ -7,36 +8,26 @@ const bookingSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  floor: {
-    type: mongoose.Schema.Types.Int32,
-    required: true,
-  },
-  company: {
-    type: String,
-    required: true,
-  },
-  building: {
-    type: String,
-    default: ''
-  },
-  reservedTo: {
+  reservedTo: { //should be linked to User //company can be from User
     type: String,
     required: true
   },
-  dateBooking: {
+  dtBooked: {
     type: Date
   },
-  dateReserved: {
+  dtFrom: {
     type: Date
   },
-  from: {
-    type: Date
-  },
-  to: {
+  dtTo: {
     type: Date
   },
   slot: {
-    type: slotSchema
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Slot'
+  },
+  floorplan: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'FloorPlan'
   }
 })
 

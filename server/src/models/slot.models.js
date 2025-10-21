@@ -5,8 +5,7 @@ const slotSchema = new mongoose.Schema({
     required: true
   },
   floor: {
-    type: mongoose.Schema.Types.Int32,
-    required: true
+    type: String,
   },
   company: {
     type: String,

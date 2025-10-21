@@ -7,14 +7,14 @@ const floorplanSchema = new mongoose.Schema({
     unique: true
   },
   floor: {
-    type: mongoose.Schema.Types.Int32,
+    type: String,
     required: true,
   },
   building: {
     type: String,
     default: ''
   },
-  slots: [slotSchema]
+  slots: [slotSchema] //not sure if needed
 })
 
 floorplanSchema.pre('deleteOne', async function(next) {
@@ -25,4 +25,7 @@ floorplanSchema.pre('deleteOne', async function(next) {
 })
 
 const FloorPlan = mongoose.model('FloorPlan', floorplanSchema)
-export default FloorPlan
+export { 
+  floorplanSchema,
+  FloorPlan,
+}
