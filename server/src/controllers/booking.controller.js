@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 import InterfaceController from './interface.controller.js'
 import { Booking, FloorPlan, Slot } from '../models/models.js'
 import Send from '../http/response.js'
@@ -23,20 +24,38 @@ class BookController extends InterfaceController {
           'Error creating booking:'
           + `slot ${slot.name} not found`)
       }
+      //generate ticketnum
+      const ticketnum = this.generateTicketNum(req.body)
+      console.log(`TESTING TICKETNUM: ${ticketnum}`)
       const booking = await Booking.create({ 
         ...data, 
+        ticketnum,
+        dtBooked: new Date(),
         slot: slotItem._id,
-        floorplan: flrplan._id, })
+        floorplan: flrplan._id, 
+      })
       if (!booking) {
         return Send.errorMsg(
           res, null, 
           'Unable to create booking:')
       }
+      req.body.ticketnum = ticketnum 
       Send.created(res, req.body, 'successfully created booking')
     }
     catch (err) {
       Send.errorMsg(res, 
         `Error creating booking: ${err.message}`
+      )
+    }
+  }
+
+  async get(req, res) {
+    try {
+
+    }
+    catch (err) {
+      Send.errorMsg(res, 
+        `Error retrieving booking: ${err.message}`
       )
     }
   }
@@ -50,6 +69,19 @@ class BookController extends InterfaceController {
       Send.errorMsg(res, 
         `Error deleting booking: ${err.message}`)
     }
+  }
+
+  generateTicketNum(data, type="PARKING") {
+    const { dtFrom, dtTo, slot, floorplan } = data
+    const str = dtFrom.toString() 
+      + dtTo.toString()
+      + slot.name
+      + floorplan.name
+    const hash = crypto.createHash('sha256')
+    hash.update(str)
+    const hexStr = hash.digest('hex') 
+    const ticketnum = hexStr.substring(hexStr.length-9, hexStr.length-1)
+    return `P${ticketnum.toUpperCase()}` 
   }
 }
 

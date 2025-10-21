@@ -74,9 +74,7 @@ class MockBooking extends MockTestObject{
   payload() {
     return {
       tower1Flr1SlotA2: {
-        ticketnum: 'ticketnum1samplesample',
         reservedTo: 'testUser@bbmail.com',
-        dtBooked: new Date(),
         dtFrom: new Date(),
         dtTo: new Date(),
         slot: {

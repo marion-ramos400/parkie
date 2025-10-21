@@ -33,7 +33,7 @@ describe('controller booking', async () => {
     tuFlrplan = new TestUtils(new FloorPlanController())
   })
   afterEach(async () => {
-    await deleteMockPayloadDb(mBooking.payload(), bkControl)
+//    await deleteMockPayloadDb(mBooking.payload(), bkControl)
     await tuFlrplan.delete()
   })
 
@@ -46,6 +46,8 @@ describe('controller booking', async () => {
     console.log(res.data)
     expect(res.status).toHaveBeenCalledWith(HTTP.CREATED)
     expect(res.data.msg).toContain('created')
+    req.body.ticketnum = res.data.ticketnum
+    await bkControl.delete(req, res)
   })
 })
 
