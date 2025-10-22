@@ -18,7 +18,8 @@ import { FloorPlan } from '../models/models.js'
 import { 
   ValidateSlot,
   ValidateSlotInFloorplan,
-  PayloadInspector
+  ValidateFloorplan,
+  PayloadInspector,
 } from '../middleware/validate.js'
 
 import {
@@ -100,6 +101,25 @@ describe('middleware payload validation', async () => {
     expect(res.status).toHaveBeenCalledWith(HTTP.NOT_FOUND)
     expect(res.data.msg).toContain(
       `slot ${req.body.slot.name} not found in floorplan`)
+  })
+
+  it('successfully validates floorplan exists', async () => {
+    await tuFlrplan.create(mFlrPlan.payload().towerOneFlr1) 
+    const req = mockhttp.request(mFlrPlan.payload().towerOneFlr1) 
+    const res = mockhttp.response()
+    inspector.setValidation(new ValidateFloorplan())
+    await inspector.validate(req, res, mockhttp.next)
+    expect(mockhttp.next).toHaveBeenCalled()
+  })
+
+
+  it('throws floorplan not exist', async () => {
+    const req = mockhttp.request(mFlrPlan.payload().towerOneFlr1) 
+    const res = mockhttp.response()
+    inspector.setValidation(new ValidateFloorplan())
+    await inspector.validate(req, res, mockhttp.next)
+    expect(res.status).toHaveBeenCalledWith(HTTP.NOT_FOUND)
+    expect(res.data.msg).toContain('floorplan not found')
   })
 
 })

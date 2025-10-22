@@ -69,7 +69,21 @@ class ValidateSlotInFloorplan extends IValidateStrategy {
 
 class ValidateFloorplan extends IValidateStrategy {
   name() { return 'Floorplan' }
-  execute(floorplan) {}
+  async execute(floorplan) {
+    if (!floorplan) {
+      return this.fail('missing floorplan', Send.badRequest)
+    }
+    if (!floorplan.name) {
+      return this.fail('missing floorplan.name parameter', Send.badRequest)
+    }
+
+    const flrplan = await FloorPlan.findOne({ name: floorplan.name })
+    if (!flrplan) {
+      return this.fail('floorplan not found', Send.notFound)
+    }
+
+    return this.ok()
+  }
 }
 
 class ValidateBooking extends IValidateStrategy {
