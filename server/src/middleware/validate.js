@@ -36,6 +36,37 @@ class ValidateSlot extends IValidateStrategy {
   }
 }
 
+class ValidateSlotInFloorplan extends IValidateStrategy {
+  name() { return 'Slot in FloorPlan'}
+  async execute(data) {
+    const { slot, floorplan } = data
+    if (!slot) {
+      return this.fail('missing slot parameter', Send.badRequest)
+    }
+    if (!slot.name) {
+      return this.fail('missing slot name', Send.badRequest)
+    }
+    if (!floorplan) {
+      return this.fail('missing floorplan parameter', Send.badRequest)
+    }
+    if (!floorplan._id) {
+      return this.fail('missing floorplan._id parameter', Send.badRequest)
+    }
+
+    const flrplan = await FloorPlan.findOne({ _id: floorplan._id })
+    if (!flrplan) {
+      return this.fail('floorplan not found', Send.notFound)
+    }
+    
+    const slotDb = await Slot.findOne({ name: slot.name, floorplan: floorplan._id})
+    if (!slotDb) {
+      return this.fail(`slot ${slot.name} not found in floorplan`, Send.notFound)
+    }
+
+    return this.ok()
+  }
+}
+
 class ValidateFloorplan extends IValidateStrategy {
   name() { return 'Floorplan' }
   execute(floorplan) {}
@@ -84,6 +115,7 @@ export {
   ValidateUser,
   ValidateSlot,
   ValidateFloorplan,
+  ValidateSlotInFloorplan,
   ValidateBooking,
   PayloadInspector,
 }

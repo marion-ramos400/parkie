@@ -8,30 +8,42 @@ import { describe,
   beforeAll,
   afterAll,
   } from 'vitest'
-
+import { TestUtils } from './utils.js'
 import { connectDB } from '../db/utils.js'
 import HTTP from '../http/codes.js'
 import Mock from './mock.js'
 
+import { FloorPlanController } from '../controllers/controllers.js'
+import { FloorPlan } from '../models/models.js'
 import { 
   ValidateSlot,
+  ValidateSlotInFloorplan,
   PayloadInspector
 } from '../middleware/validate.js'
 
 import {
-  MockSlot
+  MockSlot,
+  MockFloorPlan
 } from './mock.payload.js'
 
 describe('middleware payload validation', async () => {
-  let mockhttp;
-  let mSlot;
+  let mockhttp
+  let mSlot
+  let mFlrPlan
   let inspector = new PayloadInspector()
+  let tuFlrplan;
   beforeAll(async () => {
     await connectDB()
   })
   beforeEach(() => {
     mockhttp = new Mock()
     mSlot = new MockSlot()
+    mFlrPlan = new MockFloorPlan()
+    tuFlrplan = new TestUtils(new FloorPlanController())
+  })
+
+  afterEach(async () => {
+    await tuFlrplan.delete()
   })
 
   it('throws slot not exist', async () => {
@@ -39,7 +51,55 @@ describe('middleware payload validation', async () => {
     const res = mockhttp.response()
     inspector.setValidation(new ValidateSlot()) 
     await inspector.validate(req, res, mockhttp.next)
-    console.log(res.data)
     expect(res.status).toHaveBeenLastCalledWith(HTTP.NOT_FOUND)
   })
+
+  it('successfully validates slot exists', async () => {
+    await tuFlrplan.create(mFlrPlan.payload().towerOneFlr1)
+
+    const req = mockhttp.request(mSlot.payload().slotExist)
+    const res = mockhttp.response()
+    inspector.setValidation(new ValidateSlot())
+    await inspector.validate(req, res, mockhttp.next)
+    expect(mockhttp.next).toHaveBeenCalled()
+  })
+
+  it('successsfully validates slot is in floorplan', async () => {
+    await tuFlrplan.create(mFlrPlan.payload().towerOneFlr1) 
+
+    const { name } = mFlrPlan.payload().towerOneFlr1
+    const floorplan = await FloorPlan.findOne({ name })
+    
+    const req = {
+      body: {
+        slot: mSlot.payload().slotExist,
+        floorplan 
+      }
+    }
+    const res = mockhttp.response()
+    inspector.setValidation(new ValidateSlotInFloorplan())
+    await inspector.validate(req, res, mockhttp.next)
+    expect(mockhttp.next).toHaveBeenCalled()
+  })
+
+  it('throws slot not in floorplan', async () => {
+    await tuFlrplan.create(mFlrPlan.payload().towerOneFlr1) 
+
+    const { name } = mFlrPlan.payload().towerOneFlr1
+    const floorplan = await FloorPlan.findOne({ name })
+    
+    const req = {
+      body: {
+        slot: mSlot.payload().slotNotExist,
+        floorplan 
+      }
+    }
+    const res = mockhttp.response()
+    inspector.setValidation(new ValidateSlotInFloorplan())
+    await inspector.validate(req, res, mockhttp.next)
+    expect(res.status).toHaveBeenCalledWith(HTTP.NOT_FOUND)
+    expect(res.data.msg).toContain(
+      `slot ${req.body.slot.name} not found in floorplan`)
+  })
+
 })
