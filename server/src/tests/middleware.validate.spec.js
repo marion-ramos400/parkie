@@ -48,7 +48,9 @@ describe('middleware payload validation', async () => {
   })
 
   it('throws slot not exist', async () => {
-    const req = mockhttp.request(mSlot.payload().slotNotExist)
+    const req = mockhttp.request({
+      slot: mSlot.payload().slotNotExist
+    })
     const res = mockhttp.response()
     inspector.setValidation(new ValidateSlot()) 
     await inspector.validate(req, res, mockhttp.next)
@@ -58,7 +60,9 @@ describe('middleware payload validation', async () => {
   it('successfully validates slot exists', async () => {
     await tuFlrplan.create(mFlrPlan.payload().towerOneFlr1)
 
-    const req = mockhttp.request(mSlot.payload().slotExist)
+    const req = mockhttp.request({
+      slot: mSlot.payload().slotExist
+    })
     const res = mockhttp.response()
     inspector.setValidation(new ValidateSlot())
     await inspector.validate(req, res, mockhttp.next)
@@ -106,7 +110,9 @@ describe('middleware payload validation', async () => {
 
   it('successfully validates floorplan exists', async () => {
     await tuFlrplan.create(mFlrPlan.payload().towerOneFlr1) 
-    const req = mockhttp.request(mFlrPlan.payload().towerOneFlr1) 
+    const req = mockhttp.request({
+      floorplan: mFlrPlan.payload().towerOneFlr1
+    }) 
     const res = mockhttp.response()
     inspector.setValidation(new ValidateFloorplan())
     await inspector.validate(req, res, mockhttp.next)
@@ -116,7 +122,9 @@ describe('middleware payload validation', async () => {
 
 
   it('throws floorplan not exist', async () => {
-    const req = mockhttp.request(mFlrPlan.payload().towerOneFlr1) 
+    const req = mockhttp.request({
+      floorplan: mFlrPlan.payload().towerOneFlr1
+    }) 
     const res = mockhttp.response()
     inspector.setValidation(new ValidateFloorplan())
     await inspector.validate(req, res, mockhttp.next)

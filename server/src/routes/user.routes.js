@@ -1,6 +1,4 @@
 import express from 'express'
-import jwt from 'jsonwebtoken'
-import { JWT_SECRET } from '../env.js'
 import { hashPassword } from '../middleware/hashpassword.js'
 import { validateLogin } from '../middleware/validateLogin.js'
 import Auth from '../middleware/auth.js'

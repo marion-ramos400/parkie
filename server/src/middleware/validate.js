@@ -21,7 +21,8 @@ class ValidateUser extends IValidateStrategy {
 
 class ValidateSlot extends IValidateStrategy {
   name() { return 'Slot' }
-  async execute(slot) {
+  async execute(data) {
+    const { slot } = data
     if (!slot) {
       return this.fail('missing parameter', Send.badRequest)
     }
@@ -69,7 +70,8 @@ class ValidateSlotInFloorplan extends IValidateStrategy {
 
 class ValidateFloorplan extends IValidateStrategy {
   name() { return 'Floorplan' }
-  async execute(floorplan) {
+  async execute(data) {
+    const { floorplan } = data
     if (!floorplan) {
       return this.fail('missing floorplan', Send.badRequest)
     }
@@ -82,7 +84,7 @@ class ValidateFloorplan extends IValidateStrategy {
       return this.fail('floorplan not found', Send.notFound)
     }
 
-    return this.ok({ floorplan })
+    return this.ok({ floorplan: flrplan })
   }
 }
 
@@ -93,7 +95,7 @@ class ValidateBooking extends IValidateStrategy {
 
 class PayloadInspector {
   constructor() {
-    this.validation = null
+    this.validation = new ValidateSlot()
   }
 
   setValidation(validationStrategy) {
@@ -103,7 +105,7 @@ class PayloadInspector {
   async validate(req, res, next) {
     const valName = this.validation.name()
     try {
-      const payload = req.query 
+      const payload = req.query && req.query.length > 0
         ? qs.parse(req.query)
         : req.body
       const { pass, msg, sendCb, reqAdd } = await this.validation.execute(payload)
@@ -128,6 +130,30 @@ class PayloadInspector {
   }
 }
 
+class SlotInspector {
+  async inspect(req, res, next) {
+    const pi = new PayloadInspector() 
+    pi.setValidation(new ValidateSlot())
+    return pi.validate(req, res, next)
+  }
+}
+
+class FloorPlanInspector {
+  async inspect(req, res, next) {
+    const pi = new PayloadInspector() 
+    pi.setValidation(new ValidateFloorplan())
+    return pi.validate(req, res, next)
+  }
+}
+
+class SlotInFloorPlanInspector {
+  async inspect(req, res, next) {
+    const pi = new PayloadInspector() 
+    pi.setValidation(new ValidateSlotInFloorplan())
+    return pi.validate(req, res, next)
+  }
+}
+
 export {
   ValidateUser,
   ValidateSlot,
@@ -135,4 +161,7 @@ export {
   ValidateSlotInFloorplan,
   ValidateBooking,
   PayloadInspector,
+  SlotInspector,
+  FloorPlanInspector,
+  SlotInFloorPlanInspector,
 }

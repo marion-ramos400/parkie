@@ -25,8 +25,7 @@ class BookController extends InterfaceController {
           + `slot ${slot.name} not found`)
       }
       //generate ticketnum
-      const ticketnum = this.generateTicketNum(req.body)
-      console.log(`TESTING TICKETNUM: ${ticketnum}`)
+      const ticketnum = generateTicketNum(req.body)
       const booking = await Booking.create({ 
         ...data, 
         ticketnum,
@@ -71,18 +70,19 @@ class BookController extends InterfaceController {
     }
   }
 
-  generateTicketNum(data, type="PARKING") {
-    const { dtFrom, dtTo, slot, floorplan } = data
-    const str = dtFrom.toString() 
-      + dtTo.toString()
-      + slot.name
-      + floorplan.name
-    const hash = crypto.createHash('sha256')
-    hash.update(str)
-    const hexStr = hash.digest('hex') 
-    const ticketnum = hexStr.substring(hexStr.length-9, hexStr.length-1)
-    return `P${ticketnum.toUpperCase()}` 
-  }
+}
+
+const generateTicketNum = (data, type="PARKING") => {
+  const { dtFrom, dtTo, slot, floorplan } = data
+  const str = dtFrom.toString() 
+    + dtTo.toString()
+    + slot.name
+    + floorplan.name
+  const hash = crypto.createHash('sha256')
+  hash.update(str)
+  const hexStr = hash.digest('hex') 
+  const ticketnum = hexStr.substring(hexStr.length-9, hexStr.length-1)
+  return `P${ticketnum.toUpperCase()}` 
 }
 
 export default BookController

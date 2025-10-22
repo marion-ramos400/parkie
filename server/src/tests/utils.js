@@ -25,6 +25,7 @@ class TestUtils {
   }
 
   async delete() {
+    await delay(300)
     await this.controller.delete(this.req, this.res)
   }
 }
@@ -73,7 +74,7 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 
 const deleteMockPayloadDb = async (payloadsObj, controller) => {
   const mockhttp = new Mock()
-  await delay(100) 
+  await delay(300) 
   for(const [key, value] of Object.entries(payloadsObj)) {
     await controller.delete(mockhttp.request(value), mockhttp.response())
   }
