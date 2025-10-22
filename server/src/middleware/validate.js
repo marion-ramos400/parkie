@@ -7,10 +7,10 @@ class IValidateStrategy {
   name() { throw new Error('Not yet implemented')}
   execute(data) { throw new Error('Not yet implemented')}
   fail(msg, sendCb=null) {
-    return { pass: false, msg, sendCb }
+    return { pass: false, msg, sendCb, reqAdd: null }
   }
-  ok() {
-    return { pass: true, msg: '', sendCb: null }
+  ok(reqAdd=null) {
+    return { pass: true, msg: '', sendCb: null, reqAdd }
   }
 }
 
@@ -32,7 +32,7 @@ class ValidateSlot extends IValidateStrategy {
     if (!slotDb) {
       return this.fail(`Slot ${slot.name} not found`, Send.notFound)
     }
-    return this.ok()
+    return this.ok({ slot: slotDb})
   }
 }
 
@@ -82,7 +82,7 @@ class ValidateFloorplan extends IValidateStrategy {
       return this.fail('floorplan not found', Send.notFound)
     }
 
-    return this.ok()
+    return this.ok({ floorplan })
   }
 }
 
@@ -106,7 +106,10 @@ class PayloadInspector {
       const payload = req.query 
         ? qs.parse(req.query)
         : req.body
-      const { pass, msg, sendCb } = await this.validation.execute(payload)
+      const { pass, msg, sendCb, reqAdd } = await this.validation.execute(payload)
+      if (reqAdd) {
+        req.body = {...req.body, ...reqAdd}
+      }
       if (!pass) {
         const errMsg = `${valName} Validation Error: ${msg}`
         if (sendCb) {

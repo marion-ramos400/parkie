@@ -63,6 +63,7 @@ describe('middleware payload validation', async () => {
     inspector.setValidation(new ValidateSlot())
     await inspector.validate(req, res, mockhttp.next)
     expect(mockhttp.next).toHaveBeenCalled()
+    expect(req.body).toHaveProperty('slot')
   })
 
   it('successsfully validates slot is in floorplan', async () => {
@@ -110,6 +111,7 @@ describe('middleware payload validation', async () => {
     inspector.setValidation(new ValidateFloorplan())
     await inspector.validate(req, res, mockhttp.next)
     expect(mockhttp.next).toHaveBeenCalled()
+    expect(req.body).toHaveProperty('floorplan')
   })
 
 
