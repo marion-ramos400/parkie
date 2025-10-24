@@ -12,7 +12,8 @@ import { connectDB } from '../db/utils.js'
 import { TestUtils, delay } from './utils.js'
 import HTTP from '../http/codes.js'
 import { BookController, FloorPlanController } from '../controllers/controllers.js'
-import { MockBooking, MockFloorPlan } from './mock.payload.js'
+import { Slot } from '../models/models.js'
+import { MockBooking, MockFloorPlan, MockSlot } from './mock.payload.js'
 import { deleteMockPayloadDb } from './utils.js'
 import Mock from './mock.js'
 
@@ -45,8 +46,13 @@ describe('controller booking', async () => {
     await bkControl.create(req, res)
     expect(res.status).toHaveBeenCalledWith(HTTP.CREATED)
     expect(res.data.msg).toContain('created')
+
     req.body.ticketnum = res.data.ticketnum
     await bkControl.delete(req, res)
+    const slotItem = await Slot.findOne(
+      { name: mFlrPlan.payload().towerOneFlr1.slots[1].name }
+    )
+    expect(slotItem.isBooked).toBeTruthy()
   })
 })
 

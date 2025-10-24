@@ -38,6 +38,10 @@ class BookController extends InterfaceController {
           res, null, 
           'Unable to create booking:')
       }
+      await Slot.updateOne(
+        { _id: slotItem._id },
+        { isBooked: true }
+      )
       req.body.ticketnum = ticketnum 
       Send.created(res, req.body, 'successfully created booking')
     }
