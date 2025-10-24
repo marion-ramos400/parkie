@@ -54,6 +54,42 @@ describe('controller booking', async () => {
     )
     expect(slotItem.isBooked).toBeTruthy()
   })
+
+  it('successfully expires booking', async () => {
+    await tuFlrplan.create(mFlrPlan.payload().towerOneFlr1)
+
+    const req = mockhttp.request(mBooking.payload().expiredtower1Flr1SlotA2)
+    const res = mockhttp.response()
+    await bkControl.create(req, res)
+    expect(res.status).toHaveBeenCalledWith(HTTP.CREATED)
+    expect(res.data.msg).toContain('created')
+
+    req.body.ticketnum = res.data.ticketnum
+    await bkControl.expire(req, res)
+    const slotItem = await Slot.findOne(
+      { name: mFlrPlan.payload().towerOneFlr1.slots[1].name }
+    )
+    expect(slotItem.isBooked).toBeFalsy()
+  })
+
+  it('booking not yet for expiration', async () => {
+    await tuFlrplan.create(mFlrPlan.payload().towerOneFlr1)
+
+    const req = mockhttp.request(mBooking.payload().notExpiredtower1Flr1SlotA2)
+    const res = mockhttp.response()
+    await bkControl.create(req, res)
+    expect(res.status).toHaveBeenCalledWith(HTTP.CREATED)
+    expect(res.data.msg).toContain('created')
+
+    req.body.ticketnum = res.data.ticketnum
+    await bkControl.expire(req, res)
+    const slotItem = await Slot.findOne(
+      { name: mFlrPlan.payload().towerOneFlr1.slots[1].name }
+    )
+    expect(slotItem.isBooked).toBeTruthy()
+
+  })
+
 })
 
 

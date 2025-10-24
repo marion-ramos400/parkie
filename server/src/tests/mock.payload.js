@@ -81,12 +81,47 @@ class MockSlot extends MockTestObject {
 }
 
 class MockBooking extends MockTestObject{
+  dtPlus30min() {
+    const old = new Date()
+    const diff = 30
+    return new Date(old.getTime() + diff*60000)
+  }
   payload() {
     return {
       tower1Flr1SlotA2: {
         reservedTo: 'testUser@bbmail.com',
         dtFrom: new Date(),
         dtTo: new Date(),
+        slot: {
+          name: 'A2',
+          type: 'PARKING',
+          company: 'Test Inc' //get this from User
+        },
+        floorplan: {
+          name: 'TowerOneFlr1',
+          floor: '1',
+          building: 'Tower One',
+        }
+      },
+      expiredtower1Flr1SlotA2: {
+        reservedTo: 'testUser@bbmail.com',
+        dtFrom: new Date(),
+        dtTo: new Date('2025-10-24T08:00:00Z'),
+        slot: {
+          name: 'A2',
+          type: 'PARKING',
+          company: 'Test Inc' //get this from User
+        },
+        floorplan: {
+          name: 'TowerOneFlr1',
+          floor: '1',
+          building: 'Tower One',
+        }
+      },
+      notExpiredtower1Flr1SlotA2: {
+        reservedTo: 'testUser@bbmail.com',
+        dtFrom: new Date(),
+        dtTo: this.dtPlus30min(),
         slot: {
           name: 'A2',
           type: 'PARKING',

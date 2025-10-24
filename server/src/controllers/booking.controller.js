@@ -52,16 +52,16 @@ class BookController extends InterfaceController {
     }
   }
 
-  async get(req, res) {
-    try {
-
-    }
-    catch (err) {
-      Send.errorMsg(res, 
-        `Error retrieving booking: ${err.message}`
-      )
-    }
-  }
+//  async get(req, res) {
+//    try {
+//
+//    }
+//    catch (err) {
+//      Send.errorMsg(res, 
+//        `Error retrieving booking: ${err.message}`
+//      )
+//    }
+//  }
 
   async delete(req, res) {
     try {
@@ -74,6 +74,29 @@ class BookController extends InterfaceController {
     }
   }
 
+  async expire(req, res) {
+    try {
+      const { ticketnum } = req.body
+      const booking = await Booking.findOne({ ticketnum })
+      if (!booking) {
+        return Send.notFound(res, null,
+          `Booking ticketnumber ${ticketnum} not found`
+        )
+      }
+      const now = new Date()
+      if (now > booking.dtTo) {
+        await Slot.updateOne({ _id: booking.slot}, { isBooked: false })
+        await Booking.deleteOne({ ticketnum })          
+        return Send.success(res, null, `Booking ${ticketnum} expired`)
+      }
+      Send.success(res, null, 'Booking not yet expired')
+    }
+    catch (err) {
+      Send.errorMsg(res,
+        `Error expiring booking`
+      )
+    }
+  }
 }
 
 const generateTicketNum = (data, type="PARKING") => {
