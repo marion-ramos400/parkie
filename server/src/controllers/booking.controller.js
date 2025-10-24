@@ -87,9 +87,9 @@ class BookController extends InterfaceController {
       if (now > booking.dtTo) {
         await Slot.updateOne({ _id: booking.slot}, { isBooked: false })
         await Booking.deleteOne({ ticketnum })          
-        return Send.success(res, null, `Booking ${ticketnum} expired`)
+        return Send.success(res, { expired: true }, `Booking ${ticketnum} expired`)
       }
-      Send.success(res, null, 'Booking not yet expired')
+      Send.success(res, { expired: false }, 'Booking not yet for expired')
     }
     catch (err) {
       Send.errorMsg(res,
