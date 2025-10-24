@@ -13,22 +13,9 @@ import { UserController } from '../controllers/controllers.js'
 import Mock from './mock.js'
 import HTTP from '../http/codes.js'
 import { TestUtilsUser } from './utils.js'
+import { MockUser } from './mock.payload.js'
 
-const payload = {
-  createUserNonAdmin: {
-    email: 'emailTest123456@email.com',
-    password: '123asdzxc'
-  },
-  createUserAdmin: {
-    email: 'emailTest123456@email.com',
-    password: '123asdzxc',
-    isAdmin: true,
-  },
-  fakeTokenObj: {
-    email: 'emailFromToken@ffmail.com',
-    id: 'asdfjio12312312ad'
-  }
-}
+const payload = new MockUser().payload()
 
 describe('controller user ', async () => {
   const userControl = new UserController()

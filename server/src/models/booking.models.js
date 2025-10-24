@@ -9,8 +9,8 @@ const bookingSchema = new mongoose.Schema({
     unique: true
   },
   reservedTo: { //should be linked to User //company can be from User
-    type: String,
-    required: true
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   },
   dtBooked: {
     type: Date

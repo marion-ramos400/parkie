@@ -7,7 +7,7 @@ import InterfaceController from './interface.controller.js'
 
 class UserController extends InterfaceController {
   async create(req, res) {
-    const { email, password, isAdmin} = req.body
+    const { email, password, isAdmin, company } = req.body
     try {
       const userExist = await User.findOne({ email });
       if (userExist) {
@@ -20,6 +20,7 @@ class UserController extends InterfaceController {
       const newUser = await User.create({
         email,
         password,
+        company,
         isAdmin: isAdmin ? isAdmin : false
       })
       const adminStr = isAdmin ? 'Admin ' : ''
@@ -28,6 +29,7 @@ class UserController extends InterfaceController {
           id: newUser._id,
           email: newUser.email,
           isAdmin: newUser.isAdmin,
+          company: newUser.company,
         }
       }
       Send.created(

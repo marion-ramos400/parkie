@@ -4,17 +4,17 @@ const slotSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  floor: {
-    type: String,
-  },
+//  floor: {
+//    type: String,
+//  },
   company: {
     type: String,
     required: true
   },
-  building: {
-    type: String,
-    default: ''
-  },
+//  building: {
+//    type: String,
+//    default: ''
+//  },
   type: {
     type: String, //PARKING | OFFICE
     default: ''

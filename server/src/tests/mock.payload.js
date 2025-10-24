@@ -16,13 +16,39 @@ class MockUser extends MockTestObject {
     return {
       createUserNonAdmin: {
         email: 'emailTest123456@email.com',
-        password: '123asdzxc'
+        password: '123asdzxc',
+        company: 'Peakaboo Industries',
       },
       createUserAdmin: {
         email: 'emailTest123456@email.com',
         password: '123asdzxc',
+        company: 'Peakaboo Industries',
         isAdmin: true,
       },
+      fakeTokenObj: {
+        email: 'emailFromToken@ffmail.com',
+        id: 'asdfjio12312312ad'
+      },
+      nonExistentUser: {
+        email: 'nonexistent@pmail.com',
+        password: 'yi(012)123p**',
+        company: 'Test Company'
+      },
+      shortPassword: {
+        email: 'emailTest123456@email.com',
+        password: '123asdzxc',
+        company: 'Test Company'
+      },
+      longPassword: {
+        email: 'emailTest123456@email.com',
+        password: 'thisALong@**paSZWErdRoightHer',
+        company: 'Test Company'
+      },
+      validateUser: {
+        email: 'createDelete@email.com',
+        password: 'validateCreateDelete',
+        company: 'Test Company'
+      }
     }
   }
 }
@@ -55,12 +81,10 @@ class MockFloorPlan extends MockTestObject {
 }
 
 class MockSlot extends MockTestObject {
-  constructor(name, floor, company, building, isBooked, uiRect, type) {
+  constructor(name, company, isBooked, uiRect, type) {
     super()
     this.name = name
-    this.floor = floor
     this.company = company
-    this.building =  building
     this.isBooked = isBooked
     this.uiRect = uiRect
     this.type = type
@@ -144,11 +168,11 @@ class MockSlotTestObjects {
     const startx = 23
     const starty = 23
     return [
-      new MockSlot('A1', '1', 'Peakaboo Industries', 'Tower One', false, { x:startx*1, y:starty, w, h }, "PARKING").json(),
-      new MockSlot('A2', '1', 'Peakaboo Industries', 'Tower One', false, { x:startx*2, y:starty, w, h }, "PARKING").json(),
-      new MockSlot('A3', '1', 'Peakaboo Industries', 'Tower One', false, { x:startx*3, y:starty, w, h }, "PARKING").json(),
-      new MockSlot('A4', '1', 'Peakaboo Industries', 'Tower One', false, { x:startx*4, y:starty, w, h }, "PARKING").json(),
-      new MockSlot('A5', '1', 'Peakaboo Industries', 'Tower One', false, { x:startx*5, y:starty, w, h }, "PARKING").json(),
+      new MockSlot('A1', 'Peakaboo Industries', false, { x:startx*1, y:starty, w, h }, "PARKING").json(),
+      new MockSlot('A2', 'Peakaboo Industries', false, { x:startx*2, y:starty, w, h }, "PARKING").json(),
+      new MockSlot('A3', 'Peakaboo Industries', false, { x:startx*3, y:starty, w, h }, "PARKING").json(),
+      new MockSlot('A4', 'Peakaboo Industries', false, { x:startx*4, y:starty, w, h }, "PARKING").json(),
+      new MockSlot('A5', 'Peakaboo Industries', false, { x:startx*5, y:starty, w, h }, "PARKING").json(),
     ]
   }
   replaceSlots() {
@@ -161,7 +185,7 @@ class MockSlotTestObjects {
       const isBooked = i % 2 == 0 ? true : false
       out.push(new MockSlot(
         `B${i+1}`, 
-        '1', 'Test Inc', 'Tower One', 
+        'Test Inc', 
         isBooked,
         { x: startx + i*w, y: starty, w, h },
         'PARKING'

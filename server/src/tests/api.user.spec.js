@@ -17,30 +17,32 @@ import UserController from '../controllers/user.controller.js'
 import { hashPassword } from '../middleware/hashpassword.js'
 import { connectDB } from '../db/utils.js'
 import Mock from './mock.js'
+import { MockUser } from './mock.payload.js'
 import HTTP from '../http/codes.js'
 
-const payload = {
-  createNonAdmin: {
-    email: 'useruser@gmail.com',
-    password: '1234',
-    organization: 'Babadoo Inc'
-  },
-  createAdmin: {
-    email: 'userAdmin@gmail.com',
-    password: '1234',
-    organization: 'Babadoo Inc',
-    isAdmin: true
-  },
-  nonExistentUser: {
-    email: 'nonexistent@pmail.com',
-    password: 'yi(012)123p**'
-  }
-}
+const payload = new MockUser().payload()
+//  {
+//  createNonAdmin: {
+//    email: 'useruser@gmail.com',
+//    password: '1234',
+//    organization: 'Babadoo Inc'
+//  },
+//  createAdmin: {
+//    email: 'userAdmin@gmail.com',
+//    password: '1234',
+//    organization: 'Babadoo Inc',
+//    isAdmin: true
+//  },
+//  nonExistentUser: {
+//    email: 'nonexistent@pmail.com',
+//    password: 'yi(012)123p**'
+//  }
+//}
 
 const deleteTestUsers = async () => {
   await connectDB()
-  await User.deleteOne({ email: payload.createNonAdmin.email })
-  await User.deleteOne({ email: payload.createAdmin.email })
+  await User.deleteOne({ email: payload.createUserNonAdmin.email })
+  await User.deleteOne({ email: payload.createUserAdmin.email })
 }
 
 describe('calls /users/create endpoint', async () => {
@@ -54,7 +56,7 @@ describe('calls /users/create endpoint', async () => {
     let status;
     await axios.post(
         BACKEND_URL + '/users/create',
-        payload.createNonAdmin
+        payload.createUserNonAdmin
       )
       .then(res => {
         data = res.data
@@ -79,7 +81,7 @@ describe('calls /users/login endpoint', async () => {
   beforeEach(async () => {
     await connectDB()
     const pCopy = JSON.parse(
-      JSON.stringify(payload.createNonAdmin)
+      JSON.stringify(payload.createUserNonAdmin)
     )
     mreq = mock.request(pCopy)
     mres = mock.response()
@@ -97,7 +99,7 @@ describe('calls /users/login endpoint', async () => {
     let status;
     await axios.post(
         ENDPOINT,
-        payload.createNonAdmin
+        payload.createUserNonAdmin
       ) 
       .then(res => {
         data = res.data

@@ -12,7 +12,7 @@ import { connectDB } from '../db/utils.js'
 import { TestUtils, delay } from './utils.js'
 import HTTP from '../http/codes.js'
 import { BookController, FloorPlanController } from '../controllers/controllers.js'
-import { Slot } from '../models/models.js'
+import { User, Slot } from '../models/models.js'
 import { MockBooking, MockFloorPlan, MockSlot } from './mock.payload.js'
 import { deleteMockPayloadDb } from './utils.js'
 import Mock from './mock.js'
@@ -42,6 +42,7 @@ describe('controller booking', async () => {
     await tuFlrplan.create(mFlrPlan.payload().towerOneFlr1)
 
     const req = mockhttp.request(mBooking.payload().tower1Flr1SlotA2)
+    req.body.reservedTo = await User.findOne({ email: req.body.reservedTo })
     const res = mockhttp.response()
     await bkControl.create(req, res)
     expect(res.status).toHaveBeenCalledWith(HTTP.CREATED)
@@ -59,6 +60,7 @@ describe('controller booking', async () => {
     await tuFlrplan.create(mFlrPlan.payload().towerOneFlr1)
 
     const req = mockhttp.request(mBooking.payload().expiredtower1Flr1SlotA2)
+    req.body.reservedTo = await User.findOne({ email: req.body.reservedTo })
     const res = mockhttp.response()
     await bkControl.create(req, res)
     expect(res.status).toHaveBeenCalledWith(HTTP.CREATED)
@@ -76,6 +78,7 @@ describe('controller booking', async () => {
     await tuFlrplan.create(mFlrPlan.payload().towerOneFlr1)
 
     const req = mockhttp.request(mBooking.payload().notExpiredtower1Flr1SlotA2)
+    req.body.reservedTo = await User.findOne({ email: req.body.reservedTo })
     const res = mockhttp.response()
     await bkControl.create(req, res)
     expect(res.status).toHaveBeenCalledWith(HTTP.CREATED)
@@ -87,7 +90,7 @@ describe('controller booking', async () => {
       { name: mFlrPlan.payload().towerOneFlr1.slots[1].name }
     )
     expect(slotItem.isBooked).toBeTruthy()
-
+    await bkControl.delete(req, res)
   })
 
 })

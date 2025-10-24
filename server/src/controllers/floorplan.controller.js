@@ -11,7 +11,6 @@ class FloorPlanController extends InterfaceController {
       for(let i = 0; i < slots.length; i++) {
         slots[i].floorplan = floorplan
         const item = await Slot.create(slots[i])
-        floorplan.slots.push(item)
       }
       await floorplan.save()
       Send.created(res, null, 'floorplan created') 
@@ -30,16 +29,16 @@ class FloorPlanController extends InterfaceController {
       if (!floorplan) {
         return Send.notFound(res, null, 'floorplan not found')
       }
-      const { name, floor, building, slots } = floorplan
-      const outSlots = slots.map(item => {
+      const { name, floor, building } = floorplan
+      const slotsDb = await Slot.find({ floorplan: floorplan._id })
+      const outSlots = slotsDb.map(item => {
         const data = item._doc
         const { _id, __v, floorplan, ...props } = data
         return props
       })
-
       Send.success(
         res,
-        { name, floor, building, slots: outSlots },
+        { name, floor, building, slots: outSlots }
       )
     }
     catch (err) {
@@ -49,18 +48,22 @@ class FloorPlanController extends InterfaceController {
 
   async update(req, res) {
     try {
-      const { name, slots } = req.body
+      const { name, floor, building,  slots } = req.body
       const floorplan = await FloorPlan.findOne({ name })
       if (!floorplan) {
         return Send.notFound(res, null, 'floorplan not found')
       }
-      let newSlots = []
+      
+      //replace slots
+      await Slot.deleteMany({ floorplan: floorplan._id })
       for (let i = 0; i < slots.length; i++) {
         slots[i].floorplan = floorplan
         const item = await Slot.create(slots[i])
-        newSlots.push(item)
       }
-      const { modifiedCount } = await FloorPlan.updateOne({ name }, { slots: newSlots })
+      const { modifiedCount } = await FloorPlan.updateOne(
+        { name }, 
+        { floor, building }
+      )
       if (modifiedCount < 1) {
         return Send.notFound(
           res, { modifiedCount },

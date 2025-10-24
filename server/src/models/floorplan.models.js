@@ -14,7 +14,6 @@ const floorplanSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  slots: [slotSchema] //not sure if needed
 })
 
 floorplanSchema.pre('deleteOne', async function(next) {

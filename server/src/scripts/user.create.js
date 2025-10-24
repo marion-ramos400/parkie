@@ -9,4 +9,5 @@ const hashedPwd = await bcrypt.hash('password', 10)
 const newUser = await User.create({
   email: 'testUser@bbmail.com',
   password: hashedPwd,
+  company: 'Peakaboo Industries',
 })

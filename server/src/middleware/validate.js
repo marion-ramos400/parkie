@@ -19,6 +19,21 @@ class ValidateUser extends IValidateStrategy {
   execute(data) {}
 }
 
+class ValidateReservedTo extends IValidateStrategy {
+  name() { return 'Reserved To '}
+  async execute(data) {
+    const { reservedTo } = data
+    if (!reservedTo) {
+      return this.fail('missing reservedTo parameter', Send.badRequest)
+    }
+    const user = await User.findOne({ email: reservedTo })
+    if (!user) {
+      return this.fail('user not found', Send.notFound)
+    }
+    return this.ok({ reservedTo: user })
+  }
+}
+
 class ValidateSlot extends IValidateStrategy {
   name() { return 'Slot' }
   async execute(data) {
@@ -93,7 +108,7 @@ class ValidateBooking extends IValidateStrategy {
   execute(req, res, next) {}
 }
 
-class PayloadInspector {
+class Validator {
   constructor() {
     this.validation = new ValidateSlot()
   }
@@ -130,9 +145,18 @@ class PayloadInspector {
   }
 }
 
+
+class ReservedToInspector {
+  async inspect(req, res, next) {
+    const pi = new Validator() 
+    pi.setValidation(new ValidateReservedTo())
+    return pi.validate(req, res, next)
+  }
+}
+
 class SlotInspector {
   async inspect(req, res, next) {
-    const pi = new PayloadInspector() 
+    const pi = new Validator() 
     pi.setValidation(new ValidateSlot())
     return pi.validate(req, res, next)
   }
@@ -140,7 +164,7 @@ class SlotInspector {
 
 class FloorPlanInspector {
   async inspect(req, res, next) {
-    const pi = new PayloadInspector() 
+    const pi = new Validator() 
     pi.setValidation(new ValidateFloorplan())
     return pi.validate(req, res, next)
   }
@@ -148,20 +172,17 @@ class FloorPlanInspector {
 
 class SlotInFloorPlanInspector {
   async inspect(req, res, next) {
-    const pi = new PayloadInspector() 
+    const pi = new Validator() 
     pi.setValidation(new ValidateSlotInFloorplan())
     return pi.validate(req, res, next)
   }
 }
 
-export {
-  ValidateUser,
-  ValidateSlot,
-  ValidateFloorplan,
-  ValidateSlotInFloorplan,
-  ValidateBooking,
-  PayloadInspector,
-  SlotInspector,
-  FloorPlanInspector,
-  SlotInFloorPlanInspector,
+const payloadInspector = {
+  reservedTo: new ReservedToInspector(),
+  slot: new SlotInspector(),
+  floorplan: new FloorPlanInspector(),
+  slotInFloorplan: new SlotInFloorPlanInspector()
 }
+
+export default payloadInspector;

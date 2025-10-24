@@ -16,23 +16,11 @@ import { JWT_MAX_AGE, REFRESH_MAX_AGE } from '../env.js'
 import Auth from '../middleware/auth.js'
 import { UserController } from '../controllers/controllers.js'
 import Mock from './mock.js'
+import { MockUser } from './mock.payload.js'
 import { TestUtilsUser } from './utils.js'
 import HTTP from '../http/codes.js'
 
-let payload = {
-  shortPassword: {
-    email: 'emailTest123456@email.com',
-    password: '123asdzxc'
-  },
-  longPassword: {
-    email: 'emailTest123456@email.com',
-    password: 'thisALong@**paSZWErdRoightHer',
-  },
-  validateUser: {
-    email: 'createDelete@email.com',
-    password: 'validateCreateDelete'
-  }
-}
+let payload = new MockUser().payload()
 
 expect.extend({
   toHaveLengthGreaterThan(received, expectedLength) {
