@@ -13,19 +13,24 @@ import { connectDB } from '../db/utils.js'
 import HTTP from '../http/codes.js'
 import Mock from './mock.js'
 
-import { FloorPlanController } from '../controllers/controllers.js'
+import { FloorPlanController, UserController } from '../controllers/controllers.js'
 import { FloorPlan } from '../models/models.js'
 import * as va  from '../middleware/validate.js'
 import {
   MockSlot,
-  MockFloorPlan
+  MockFloorPlan,
+  MockUser,
+  MockBooking,
 } from './mock.payload.js'
 
 describe('middleware payload validation', async () => {
   let mockhttp
   let mSlot
   let mFlrPlan
-  let tuFlrplan;
+  let tuFlrplan
+  let mUser
+  let tuUser
+  let mBook
   beforeAll(async () => {
     await connectDB()
   })
@@ -34,10 +39,13 @@ describe('middleware payload validation', async () => {
     mSlot = new MockSlot()
     mFlrPlan = new MockFloorPlan()
     tuFlrplan = new TestUtils(new FloorPlanController())
+    mUser = new MockUser()
+    tuUser = new TestUtils(new UserController())
+    mBook = new MockBooking() 
   })
-
   afterEach(async () => {
     await tuFlrplan.delete()
+    await tuUser.delete()
   })
 
   it('throws slot not exist', async () => {
@@ -123,6 +131,94 @@ describe('middleware payload validation', async () => {
     await inspector.validate(req, res, mockhttp.next)
     expect(res.status).toHaveBeenCalledWith(HTTP.NOT_FOUND)
     expect(res.data.msg).toContain('floorplan not found')
+  })
+
+  it('successfully validates slot company and user company match', async () => {
+    await tuFlrplan.create(mFlrPlan.payload().towerOneFlr1) 
+    await tuUser.create(mUser.payload().createUserNonAdmin)
+
+    let req = mockhttp.request(
+      mBook.payload().userNonAdmin
+    )
+    const res = mockhttp.response()
+    const next = mockhttp.next
+
+    //inspect reserveTo
+    const inspector = new va.Validator()
+    inspector.setValidation(new va.ValidateReservedTo())
+    await inspector.validate(req, res, next)
+    expect(req.body.reservedTo).toHaveProperty('_id')
+
+    //inspect slot
+    inspector.setValidation(new va.ValidateSlot())
+    await inspector.validate(req, res, next)
+    expect(req.body.slot).toHaveProperty('_id')
+    
+    inspector.setValidation(new va.ValidateSlotCompany)
+    await inspector.validate(req, res, next)
+    expect(next).toBeCalledTimes(3)
+  })
+
+  it('throws mismatch slot company and user company', async () => {
+    await tuFlrplan.create(mFlrPlan.payload().towerOneFlr1) 
+    await tuUser.create(mUser.payload().createUserNonAdmin)
+
+    let req = mockhttp.request(
+      mBook.payload().userNonAdminCompanyMismatch
+    )
+    const res = mockhttp.response()
+    const next = mockhttp.next
+
+    //inspect reserveTo
+    const inspector = new va.Validator()
+    inspector.setValidation(new va.ValidateReservedTo())
+    await inspector.validate(req, res, next)
+    expect(req.body.reservedTo).toHaveProperty('_id')
+
+    //inspect slot
+    inspector.setValidation(new va.ValidateSlot())
+    await inspector.validate(req, res, next)
+    expect(req.body.slot).toHaveProperty('_id')
+    
+    inspector.setValidation(new va.ValidateSlotCompany)
+    await inspector.validate(req, res, next)
+    expect(res.status).toHaveBeenLastCalledWith(HTTP.BAD_REQUEST)
+    expect(res.data.msg).toContain('mismatch')
+  })
+
+  it('successfully validates reservedTo User', async () => {
+    await tuFlrplan.create(mFlrPlan.payload().towerOneFlr1) 
+    await tuUser.create(mUser.payload().createUserNonAdmin)
+
+    let req = mockhttp.request(
+      mBook.payload().userNonAdmin
+    )
+    const res = mockhttp.response()
+    const next = mockhttp.next
+
+    //inspect reserveTo
+    const inspector = new va.Validator()
+    inspector.setValidation(new va.ValidateReservedTo())
+    await inspector.validate(req, res, next)
+    expect(req.body.reservedTo).toHaveProperty('_id')
+    expect(next).toHaveBeenCalledTimes(1)
+  })
+
+  it('throws user not found in validate reservedTo', async () => {
+    await tuFlrplan.create(mFlrPlan.payload().towerOneFlr1) 
+
+    let req = mockhttp.request(
+      mBook.payload().userNonAdmin
+    )
+    const res = mockhttp.response()
+    const next = mockhttp.next
+
+    //inspect reserveTo
+    const inspector = new va.Validator()
+    inspector.setValidation(new va.ValidateReservedTo())
+    await inspector.validate(req, res, next)
+    expect(res.status).toHaveBeenLastCalledWith(HTTP.NOT_FOUND)
+    expect(res.data.msg).toContain('user not found')
   })
 
 })

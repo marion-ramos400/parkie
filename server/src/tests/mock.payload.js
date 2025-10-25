@@ -127,6 +127,36 @@ class MockBooking extends MockTestObject{
           building: 'Tower One',
         }
       },
+      userNonAdmin: {
+        reservedTo: 'emailTest123456@email.com',
+        dtFrom: new Date(),
+        dtTo: new Date(),
+        slot: {
+          name: 'A2',
+          type: 'PARKING',
+          company: 'Test Inc' //get this from User
+        },
+        floorplan: {
+          name: 'TowerOneFlr1',
+          floor: '1',
+          building: 'Tower One',
+        }
+      },
+      userNonAdminCompanyMismatch: {
+        reservedTo: 'emailTest123456@email.com',
+        dtFrom: new Date(),
+        dtTo: new Date(),
+        slot: {
+          name: 'W4',
+          type: 'PARKING',
+//          company: 'Test Inc' //get this from User
+        },
+        floorplan: {
+          name: 'TowerOneFlr1',
+          floor: '1',
+          building: 'Tower One',
+        }
+      },
       expiredtower1Flr1SlotA2: {
         reservedTo: 'testUser@bbmail.com',
         dtFrom: new Date(),
@@ -173,6 +203,7 @@ class MockSlotTestObjects {
       new MockSlot('A3', 'Peakaboo Industries', false, { x:startx*3, y:starty, w, h }, "PARKING").json(),
       new MockSlot('A4', 'Peakaboo Industries', false, { x:startx*4, y:starty, w, h }, "PARKING").json(),
       new MockSlot('A5', 'Peakaboo Industries', false, { x:startx*5, y:starty, w, h }, "PARKING").json(),
+      new MockSlot('W4', 'Wrong Company', false, { x:startx*6, y:starty, w, h }, "PARKING").json(),
     ]
   }
   replaceSlots() {
