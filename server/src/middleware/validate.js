@@ -83,6 +83,24 @@ class ValidateSlotInFloorplan extends IValidateStrategy {
   }
 }
 
+class ValidateSlotCompany extends IValidateStrategy {
+  name() { return 'Slot Company' }
+  async execute(data) {
+    const { slot, reservedTo } = data //expected to be object already
+    if (!slot) {
+      return this.fail('missing slot parameter', Send.badRequest)
+    }
+    if (!reservedTo) {
+      return this.fail('missing user parameter', Send.badRequest)
+    }
+    if (slot.company !== reservedTo.company) {
+      return this.fail(
+        'mismatch slot company and user company', Send.badRequest)
+    }
+    return this.ok()
+  }
+}
+
 class ValidateFloorplan extends IValidateStrategy {
   name() { return 'Floorplan' }
   async execute(data) {
@@ -109,12 +127,13 @@ class ValidateBooking extends IValidateStrategy {
 }
 
 class Validator {
-  constructor() {
-    this.validation = new ValidateSlot()
+  constructor(validation) {
+    this.validation = validation
   }
 
   setValidation(validationStrategy) {
     this.validation = validationStrategy
+    return this
   }
 
   async validate(req, res, next) {
@@ -146,43 +165,19 @@ class Validator {
 }
 
 
-class ReservedToInspector {
-  async inspect(req, res, next) {
-    const pi = new Validator() 
-    pi.setValidation(new ValidateReservedTo())
-    return pi.validate(req, res, next)
-  }
+const setInspectors = (validators) => {
+  return validators.map((item) => {
+    return (req, res, next) => { item.validate(req, res, next) }
+  })
 }
 
-class SlotInspector {
-  async inspect(req, res, next) {
-    const pi = new Validator() 
-    pi.setValidation(new ValidateSlot())
-    return pi.validate(req, res, next)
-  }
+export {
+  ValidateSlot,
+  ValidateFloorplan,
+  ValidateSlotInFloorplan,
+  ValidateSlotCompany,
+  ValidateReservedTo,
+  ValidateUser,
+  Validator,
+  setInspectors,
 }
-
-class FloorPlanInspector {
-  async inspect(req, res, next) {
-    const pi = new Validator() 
-    pi.setValidation(new ValidateFloorplan())
-    return pi.validate(req, res, next)
-  }
-}
-
-class SlotInFloorPlanInspector {
-  async inspect(req, res, next) {
-    const pi = new Validator() 
-    pi.setValidation(new ValidateSlotInFloorplan())
-    return pi.validate(req, res, next)
-  }
-}
-
-const payloadInspector = {
-  reservedTo: new ReservedToInspector(),
-  slot: new SlotInspector(),
-  floorplan: new FloorPlanInspector(),
-  slotInFloorplan: new SlotInFloorPlanInspector()
-}
-
-export default payloadInspector;

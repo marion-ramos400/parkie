@@ -15,7 +15,7 @@ import Mock from './mock.js'
 
 import { FloorPlanController } from '../controllers/controllers.js'
 import { FloorPlan } from '../models/models.js'
-import inspector  from '../middleware/validate.js'
+import * as va  from '../middleware/validate.js'
 import {
   MockSlot,
   MockFloorPlan
@@ -45,7 +45,8 @@ describe('middleware payload validation', async () => {
       slot: mSlot.payload().slotNotExist
     })
     const res = mockhttp.response()
-    await inspector.slot.inspect(req, res, mockhttp.next)
+    const inspector = new va.Validator(new va.ValidateSlot())
+    await inspector.validate(req, res, mockhttp.next)
     expect(res.status).toHaveBeenLastCalledWith(HTTP.NOT_FOUND)
   })
 
@@ -56,7 +57,8 @@ describe('middleware payload validation', async () => {
       slot: mSlot.payload().slotExist
     })
     const res = mockhttp.response()
-    await inspector.slot.inspect(req, res, mockhttp.next)
+    const inspector = new va.Validator(new va.ValidateSlot())
+    await inspector.validate(req, res, mockhttp.next)
     expect(mockhttp.next).toHaveBeenCalled()
     expect(req.body).toHaveProperty('slot')
   })
@@ -74,7 +76,8 @@ describe('middleware payload validation', async () => {
       }
     }
     const res = mockhttp.response()
-    await inspector.slotInFloorplan.inspect(req, res, mockhttp.next)
+    const inspector = new va.Validator(new va.ValidateSlotInFloorplan())
+    await inspector.validate(req, res, mockhttp.next)
     expect(mockhttp.next).toHaveBeenCalled()
   })
 
@@ -91,7 +94,8 @@ describe('middleware payload validation', async () => {
       }
     }
     const res = mockhttp.response()
-    await inspector.slotInFloorplan.inspect(req, res, mockhttp.next)
+    const inspector = new va.Validator(new va.ValidateSlotInFloorplan())
+    await inspector.validate(req, res, mockhttp.next)
     expect(res.status).toHaveBeenCalledWith(HTTP.NOT_FOUND)
     expect(res.data.msg).toContain(
       `slot ${req.body.slot.name} not found in floorplan`)
@@ -103,7 +107,8 @@ describe('middleware payload validation', async () => {
       floorplan: mFlrPlan.payload().towerOneFlr1
     }) 
     const res = mockhttp.response()
-    await inspector.floorplan.inspect(req, res, mockhttp.next)
+    const inspector = new va.Validator(new va.ValidateFloorplan())
+    await inspector.validate(req, res, mockhttp.next)
     expect(mockhttp.next).toHaveBeenCalled()
     expect(req.body).toHaveProperty('floorplan')
   })
@@ -114,7 +119,8 @@ describe('middleware payload validation', async () => {
       floorplan: mFlrPlan.payload().towerOneFlr1
     }) 
     const res = mockhttp.response()
-    await inspector.floorplan.inspect(req, res, mockhttp.next)
+    const inspector = new va.Validator(new va.ValidateFloorplan())
+    await inspector.validate(req, res, mockhttp.next)
     expect(res.status).toHaveBeenCalledWith(HTTP.NOT_FOUND)
     expect(res.data.msg).toContain('floorplan not found')
   })
