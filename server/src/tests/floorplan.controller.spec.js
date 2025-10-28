@@ -10,14 +10,17 @@ import { describe,
   } from 'vitest'
 import { connectDB } from '../db/utils.js'
 import HTTP from '../http/codes.js'
-import { FloorPlanController } from '../controllers/controllers.js'
-import { MockFloorPlan } from './mock.payload.js'
+import { FloorPlanController, UserController } from '../controllers/controllers.js'
+import { MockFloorPlan, MockUser } from './mock.payload.js'
 import { deleteMockPayloadDb } from './utils.js'
+import { TestUtilsUser } from './utils.js'
+import Auth from '../middleware/auth.js'
 import Mock from './mock.js'
 
 describe('controller floorplan', async () => {
   let mockhttp;
   let mFloorPlan;
+  let mUser;
   let fpControl = new FloorPlanController()
 
   beforeAll( async () => {
@@ -26,9 +29,11 @@ describe('controller floorplan', async () => {
   beforeEach(() => {
     mockhttp = new Mock()
     mFloorPlan = new MockFloorPlan()
+    mUser = new MockUser()
   })
   afterEach(async () => {
     await deleteMockPayloadDb(mFloorPlan.payload(), fpControl)
+    await deleteMockPayloadDb(mUser.payload(), new UserController())
   })
 
   it('successfully creates floorplan', async () => {
@@ -98,12 +103,29 @@ describe('controller floorplan', async () => {
       mFloorPlan.payload().towerOneFlr1.slots[0])
   })
 
-  it('successfully gets company floorplans with slots', async () => {
-    let req = mockhttp.request(mFloorPlan.payload().towerOneFlr1)
-    const res = mockhttp.response()
-    await fpControl.create(req, res)
-    req.body.company = 'Peakaboo Industries'
+//  it('successfully gets company floorplans with slots', async () => {
+//    let req = mockhttp.request(mFloorPlan.payload().towerOneFlr1)
+//    const res = mockhttp.response()
+//    await fpControl.create(req, res)
+//    req.body.company = 'Peakaboo Industries'
+//    await fpControl.getCompanyFloorplans(req, res)
+//    expect(res.status).toHaveBeenLastCalledWith(HTTP.SUCCESS)
+//  })
+
+  it('successfully verifies jwt and gets company floorplans with slots', async () => {
+    //create floorplan
+    let fpreq = mockhttp.request(mFloorPlan.payload().towerOneFlr1)
+    const fpres = mockhttp.response()
+    await fpControl.create(fpreq, fpres)
+
+    const testUtilsUser = new TestUtilsUser(mUser.payload().createUserNonAdmin, mockhttp)
+    const [req, res] = await testUtilsUser.createThenLogin()
+    //verify token
+    req.cookies = { accessToken: res.cookies.accessToken }
+    await Auth.verifyJwt(req, res, mockhttp.next)
+
     await fpControl.getCompanyFloorplans(req, res)
     expect(res.status).toHaveBeenLastCalledWith(HTTP.SUCCESS)
+    expect(res.data).toHaveProperty('floorplans')
   })
 })

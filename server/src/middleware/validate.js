@@ -16,7 +16,15 @@ class IValidateStrategy {
 
 class ValidateUser extends IValidateStrategy {
   name() { return 'User' }
-  execute(data) {}
+//  execute(data) {}
+//  inspect(req, res, next) {
+//    try {
+//
+//    }
+//    catch (err) {
+//      return Send.errorMsg(res, `Error Validate User: ${err.message}`)
+//    }
+//  }
 }
 
 class ValidateReservedTo extends IValidateStrategy {

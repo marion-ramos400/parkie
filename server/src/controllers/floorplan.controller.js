@@ -1,7 +1,7 @@
 import qs from 'qs'
 import InterfaceController from './interface.controller.js'
 import Send from '../http/response.js'
-import { FloorPlan, Slot } from '../models/models.js'
+import { FloorPlan, Slot, User } from '../models/models.js'
 
 class FloorPlanController extends InterfaceController {
   async create(req, res) {
@@ -95,7 +95,8 @@ class FloorPlanController extends InterfaceController {
     try {
       //parse query from previous middleware
       //get company from user
-      const { company } = req.body
+      const { user } = req.body
+      const { company } = await User.findOne({ _id: user.id })
       const slots = await Slot.find({ company })
 
       let floorplansStr = slots.map(item => item.floorplan.toString())

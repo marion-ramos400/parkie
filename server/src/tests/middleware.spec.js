@@ -103,7 +103,7 @@ describe('middleware', async() => {
     //verify token
     req.cookies = { accessToken: res.cookies.accessToken }
     await Auth.verifyJwt(req, res, mock.next)
-    expect(req.body.tokenObj).toHaveProperty('email')
+    expect(req.body.user).toHaveProperty('email')
   })
 
   it('throws error when jwt is expired', async () => {

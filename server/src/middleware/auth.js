@@ -14,10 +14,10 @@ class Auth {
       //should throw error if invalid, expired etc
       const tokenObj = jwt.verify(token, env.JWT_SECRET)
       if (!req.body) { //for get req
-        req.body = { tokenObj }
+        req.body = { user: tokenObj }
       }
       else { // for post req
-        req.body.tokenObj = tokenObj
+        req.body.user = tokenObj
       }
       next()
     }
