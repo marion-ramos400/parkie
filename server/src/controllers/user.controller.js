@@ -61,7 +61,7 @@ class UserController extends InterfaceController {
 
   async validate(req, res) {
     try {
-      const { email, id } = req.body.tokenObj
+      const { email, id } = req.body.user
       const user = await User.findOne({ email })
       if (!user) {
         return Send.notFound(res, null, 'User not found')
@@ -75,7 +75,7 @@ class UserController extends InterfaceController {
 
   async get(req, res) {
     try {
-      const { email, id } = req.body.tokenObj
+      const { email, id } = req.body.user
       const user = await User.findOne({ email })
       if (!user) {
         return Send.notFound(res, null, 'User not found')
