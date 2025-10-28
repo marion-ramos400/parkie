@@ -90,6 +90,39 @@ class FloorPlanController extends InterfaceController {
         `Error deleting floorplan: ${err.message}`)
     }
   }
+
+  async getCompanyFloorplans(req, res) {
+    try {
+      //parse query from previous middleware
+      //get company from user
+      const { company } = req.body
+      const slots = await Slot.find({ company })
+
+      let floorplansStr = slots.map(item => item.floorplan.toString())
+      floorplansStr = new Set(floorplansStr)
+      floorplansStr = [...floorplansStr]
+
+      const floorplans = []
+      for ( const fp of floorplansStr ) {
+        const { name, floor, building } = await FloorPlan.findOne({ _id: fp })
+        const slotsFp = await Slot.find({ floorplan: { _id: fp }, company })
+        floorplans.push(
+          {
+            name,
+            floor,
+            building,
+            slots: slotsFp
+          }
+        )
+      }
+
+      Send.success(res, { floorplans: floorplans }, undefined)
+    }
+    catch (err) {
+      Send.errorMsg(res, 
+        `Error getting company floorplans: ${err.message}`)
+    }
+  }
 }
 
 export default FloorPlanController

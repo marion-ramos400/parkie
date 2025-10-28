@@ -97,4 +97,13 @@ describe('controller floorplan', async () => {
     expect(res.data.slots[0]).toEqual(
       mFloorPlan.payload().towerOneFlr1.slots[0])
   })
+
+  it('successfully gets company floorplans with slots', async () => {
+    let req = mockhttp.request(mFloorPlan.payload().towerOneFlr1)
+    const res = mockhttp.response()
+    await fpControl.create(req, res)
+    req.body.company = 'Peakaboo Industries'
+    await fpControl.getCompanyFloorplans(req, res)
+    expect(res.status).toHaveBeenLastCalledWith(HTTP.SUCCESS)
+  })
 })

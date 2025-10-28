@@ -6,7 +6,8 @@ import { connectDB } from './db/utils.js'
 import {
   userRouter,
   bookingRouter,
-  parkingRouter
+  parkingRouter,
+  floorPlanRouter,
 } from './routes/routes.js'
 
 const app = express()
@@ -21,6 +22,7 @@ app.use(cookieParser())
 app.use('/users', userRouter)
 app.use('/parking', parkingRouter)
 app.use('/booking', bookingRouter)
+app.use('/floorplans', floorPlanRouter)
 
 const runServer = async () => {
   try {
