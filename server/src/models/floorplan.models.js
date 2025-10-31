@@ -14,6 +14,10 @@ const floorplanSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  img: {
+    data: Buffer,
+    contentType: String,
+  }
 })
 
 floorplanSchema.pre('deleteOne', async function(next) {

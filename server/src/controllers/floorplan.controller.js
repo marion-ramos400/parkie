@@ -1,18 +1,29 @@
 import qs from 'qs'
+import { promises as fs } from 'fs'
+import path from 'path'
 import InterfaceController from './interface.controller.js'
 import Send from '../http/response.js'
 import { FloorPlan, Slot, User } from '../models/models.js'
+import { UPLOADS_PATH } from '../env.js'
 
 class FloorPlanController extends InterfaceController {
   async create(req, res) {
     try {
       const { slots, ...other } = req.body
-      const floorplan = await FloorPlan.create(other)
-      for(let i = 0; i < slots.length; i++) {
-        slots[i].floorplan = floorplan
-        const item = await Slot.create(slots[i])
+      const fname = req.file.filename
+      const obj = {
+        ...other,
+        img: await getImgObj(fname)
       }
-      await floorplan.save()
+      //delete the file after constructing obj
+      await removeUploadedFile(fname)
+      const floorplan = await FloorPlan.create(obj)
+      if (slots) {
+        for(let i = 0; i < slots.length; i++) {
+          slots[i].floorplan = floorplan
+          const item = await Slot.create(slots[i])
+        }
+      }
       Send.created(res, null, 'floorplan created') 
     }
     catch (err) {
@@ -124,6 +135,23 @@ class FloorPlanController extends InterfaceController {
         `Error getting company floorplans: ${err.message}`)
     }
   }
+
 }
+
+async function removeUploadedFile(fname) {
+  const fpath = path.join(UPLOADS_PATH, fname)
+  await fs.access(fpath)
+  await fs.unlink(fpath)
+}
+
+async function getImgObj(fname) {
+  return {
+    data: await fs.readFile(
+      path.join(UPLOADS_PATH, fname)
+    ),
+    contentType: 'image/png'
+  } 
+}
+
 
 export default FloorPlanController

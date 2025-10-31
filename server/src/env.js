@@ -11,6 +11,8 @@ const {
   PORT,
   BACKEND_URL,
   DB_NAME,
+  UPLOADS_PATH,
+  IMG_FILE_LABEL,
 } = process.env
 
 const getMaxAgeForCookie = (envar) => { 
@@ -42,4 +44,6 @@ export {
   PORT,
   BACKEND_URL,
   DB_NAME,
+  UPLOADS_PATH,
+  IMG_FILE_LABEL,
 }
