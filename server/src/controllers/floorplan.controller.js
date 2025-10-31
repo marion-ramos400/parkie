@@ -4,6 +4,7 @@ import path from 'path'
 import InterfaceController from './interface.controller.js'
 import Send from '../http/response.js'
 import { FloorPlan, Slot, User } from '../models/models.js'
+import { removeUploadedFile } from '../middleware/storage.js'
 import { UPLOADS_PATH } from '../env.js'
 
 class FloorPlanController extends InterfaceController {
@@ -135,21 +136,15 @@ class FloorPlanController extends InterfaceController {
         `Error getting company floorplans: ${err.message}`)
     }
   }
-
-}
-
-async function removeUploadedFile(fname) {
-  const fpath = path.join(UPLOADS_PATH, fname)
-  await fs.access(fpath)
-  await fs.unlink(fpath)
 }
 
 async function getImgObj(fname) {
+  const ext = path.extname(fname).toLowerCase().split('.')[1]
   return {
     data: await fs.readFile(
       path.join(UPLOADS_PATH, fname)
     ),
-    contentType: 'image/png'
+    contentType: `image/${ext}`
   } 
 }
 

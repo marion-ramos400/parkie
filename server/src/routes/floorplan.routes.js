@@ -2,8 +2,9 @@ import express from 'express'
 import { FloorPlanController } from '../controllers/controllers.js'
 import Auth from '../middleware/auth.js'
 import { upload } from '../middleware/storage.js'
-import { IMG_FILE_LABEL } from '../env.js'
 import { FloorPlan } from '../models/models.js'
+import { ValidateImageFile } from '../middleware/validate.js'
+import { IMG_FILE_LABEL } from '../env.js'
 
 const floorplan = new FloorPlanController()
 
@@ -16,6 +17,7 @@ router.get('/company',
 
 router.post('/create', 
   upload.single(IMG_FILE_LABEL),
+  ValidateImageFile.validate,
   floorplan.create
 )
 

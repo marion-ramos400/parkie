@@ -1,5 +1,5 @@
 import multer from 'multer'
-import fs from 'fs'
+import { promises as fs } from 'fs'
 import path from 'path'
 import { UPLOADS_PATH } from '../env.js'
 import Send from '../http/response.js'
@@ -20,7 +20,14 @@ const upload = multer({
   storage: storage,
 })
 
+const removeUploadedFile = async (fname) => {
+  const fpath = path.join(UPLOADS_PATH, fname)
+  await fs.access(fpath)
+  await fs.unlink(fpath)
+}
+
 
 export {
   upload,
+  removeUploadedFile
 }

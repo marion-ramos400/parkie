@@ -1,5 +1,7 @@
 import qs from 'qs'
+import path from 'path'
 import Send from '../http/response.js'
+import { removeUploadedFile } from '../middleware/storage.js'
 import { User, Slot, FloorPlan, Booking } from '../models/models.js'
 
 
@@ -134,6 +136,25 @@ class ValidateBooking extends IValidateStrategy {
   execute(req, res, next) {}
 }
 
+class ValidateImageFile {
+  static async validate(req, res, next) {
+    try {
+      const fname = req.file.filename
+      const validExt = ['jpg', 'jpeg', 'png']
+      const ext = path.extname(fname).toLowerCase().split('.')[1]
+      if (!validExt.includes(ext)) {
+        //delete file from file system
+        await removeUploadedFile(fname) 
+        return Send.badRequest(res, null, 'file type not allowed')
+      }
+      next()
+    }
+    catch (err) {
+      Send.errorMsg(res, `error validating image file: ${err.message}`)
+    }
+  }
+}
+
 class Validator {
   constructor(validation) {
     this.validation = validation
@@ -187,5 +208,6 @@ export {
   ValidateReservedTo,
   ValidateUser,
   Validator,
+  ValidateImageFile,
   setInspectors,
 }
