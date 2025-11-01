@@ -24,7 +24,11 @@
   const createBooking = (e) => {
     if (fpName.value 
       && fpFloor.value 
-      && fpBldg.value) {
+      && fpBldg.value
+      && imgData.value
+      ) {
+      //save imgData.value in storage, load it in the next view
+      sessionStorage.setItem('fpimg', imgData.value)
       const rProps = `/${fpName.value}`
         + `/${fpFloor.value}`
         + `/${fpBldg.value}`

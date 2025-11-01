@@ -53,7 +53,7 @@ const routes = [
         }
       },
       {
-        path: 'setslots/:fpname/:floor/:bldg', ///
+        path: 'setslots/:fpname/:floor/:bldg',
         name: 'setslots',
         props: true,
         components: {
