@@ -16,6 +16,10 @@
       url: "/dashboard/office",
       text: "Office"
     },
+    parkingadmin: {
+      url: "/dashboard/parkingadmin",
+      text: "Parking Admin"
+    },
     logout: {
       url: "/",
       text: "Log Out"

@@ -5,6 +5,7 @@ import Dashboard from '@/components/Dashboard/Dashboard.vue'
 import Home from '@/components/Home/Home.vue'
 import Parking from '@/components/Parking/Parking.vue'
 import ParkingAdmin from '@/components/Parking/ParkingAdmin.vue'
+import ParkingSetSlots from '@/components/Parking/ParkingSetSlots.vue'
 import Office from '@/components/Office/Office.vue'
 
 const routes = [
@@ -43,6 +44,21 @@ const routes = [
         components: {
           DashboardView: Office
         } 
+      },
+      {
+        path: 'parkingadmin',
+        name: 'parkingadmin',
+        components: {
+          DashboardView: ParkingAdmin
+        }
+      },
+      {
+        path: 'setslots/:fpname/:floor/:bldg', ///
+        name: 'setslots',
+        props: true,
+        components: {
+          DashboardView: ParkingSetSlots
+        }
       }
     ]
   },
