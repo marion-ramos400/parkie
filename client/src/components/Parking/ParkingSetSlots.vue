@@ -15,19 +15,25 @@
   const parkSlot = ref({})
   const startLeft = ref(null)
   const startTop = ref(null)
+  const allowDraw = ref(true)
+
+  const isDragging = ref(false)
 
 
   const imgData = ref(null)
 
   const drawStart = (e) => {
-    mouseHold.value = true
-    startLeft.value = e.offsetX
-    startTop.value = e.offsetY
+    if(allowDraw.value) {
+      parkSlot.value.pointerEvents = 'none'
+      mouseHold.value = true
+      startLeft.value = e.offsetX
+      startTop.value = e.offsetY
 
-    parkSlot.value.top = `${e.offsetY}px`
-    parkSlot.value.left = `${e.offsetX}px`
-    parkSlot.value.width = null
-    parkSlot.value.height = null
+      parkSlot.value.top = `${e.offsetY}px`
+      parkSlot.value.left = `${e.offsetX}px`
+      parkSlot.value.width = null
+      parkSlot.value.height = null
+    }
   }
 
   const getIntPx = (item) => {
@@ -36,9 +42,14 @@
 
   const drawFinish = (e) => {
     mouseHold.value = false
+    allowDraw.value = false
+    parkSlot.value.pointerEvents = 'auto'
   }
 
+
+
   const mouseMove = (e) => {
+    //TODO try using e.movementX and e.movementY instead
     if (mouseHold.value) {
       const diffX = Math.abs(e.offsetX - startLeft.value)
       if (e.offsetX < startLeft.value) {
@@ -54,12 +65,32 @@
     }
   }
 
+  const dragging = (e) => {
+    isDragging.value = true
+  }
+
+  const dragend =(e) => {
+    isDragging.value = false
+  }
+
+  const changePos = (e) => {
+    if(isDragging.value) {
+      const pos = [e.movementX, e.movementY]
+      const left = getIntPx(parkSlot.value.left)
+      const top = getIntPx(parkSlot.value.top)
+      parkSlot.value.left = `${left + pos[0]}px`
+      parkSlot.value.top = `${top + pos[1]}px`
+    }
+  }
+
   onMounted(() => {
     const fpimg = sessionStorage.getItem("fpimg")
     imgData.value = fpimg
     sessionStorage.removeItem("fpimg")
   })
 
+
+//          draggable="true"
 </script>
 <template>
   <div>
@@ -76,7 +107,12 @@
         >
         <div class="divtest"
           :style="parkSlot"
+          v-on:mousedown="dragging"
+          v-on:mouseup="dragend"
+          v-on:mousemove="changePos"
+          v-on:mouseout="dragend"
           >
+
         </div>
       </div>
       <img :src="VITE_PARKING_FLOORPLAN" alt=""
@@ -99,6 +135,10 @@
   .divtest {
     position: absolute;
     background-color: blue;
-    pointer-events: none;
+/*     pointer-events: none; */
+/*     width: 24px; */
+/*     height: 24px; */
+/*     top: 0; */
+/*     left: 0; */
   }
 </style>
