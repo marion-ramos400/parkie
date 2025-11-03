@@ -49,7 +49,7 @@ const routes = [
         path: 'parkingadmin',
         name: 'parkingadmin',
         components: {
-          DashboardView: ParkingAdmin
+          DashboardView: ParkingSetSlots//ParkingAdmin
         }
       },
       {
