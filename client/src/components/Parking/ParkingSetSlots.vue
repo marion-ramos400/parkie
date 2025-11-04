@@ -1,7 +1,15 @@
 <script setup>
   import { ref, onMounted } from 'vue'
+  import ParkingCreateSlotArray from '@/components/Parking/ParkingCreateSlotArray.vue'
 
   import { VITE_PARKING_FLOORPLAN } from '@/env.js' //TODO remove
+  import { getIntPx } from './utils.js'
+
+  const State = {
+    INIT: 0,
+    DRAW: 1,
+    EDIT_SLOTGROUP: 2,
+  }
 
   const props = defineProps([
     'fpname',
@@ -9,23 +17,19 @@
     'bldg',
   ])
 
+  const state = ref(State.INIT)
+  const slotGroup = ref([])
+
   const imgW = ref('752px')
   const imgH = ref('615px')
-  const mouseHold = ref(false)
   const parkSlot = ref({})
   const startLeft = ref(null)
   const startTop = ref(null)
-  const allowDraw = ref(true)
-
-  const isDragging = ref(false)
-
 
   const imgData = ref(null)
 
   const drawStart = (e) => {
-    if(allowDraw.value) {
-      parkSlot.value.pointerEvents = 'none'
-      mouseHold.value = true
+    if(state.value === State.INIT) {
       startLeft.value = e.offsetX
       startTop.value = e.offsetY
 
@@ -33,24 +37,13 @@
       parkSlot.value.left = `${e.offsetX}px`
       parkSlot.value.width = null
       parkSlot.value.height = null
+
+      state.value = State.DRAW
     }
   }
 
-  const getIntPx = (item) => {
-    return parseInt(item.split('px')[0])
-  }
-
-  const drawFinish = (e) => {
-    mouseHold.value = false
-    allowDraw.value = false
-    parkSlot.value.pointerEvents = 'auto'
-  }
-
-
-
-  const mouseMove = (e) => {
-    //TODO try using e.movementX and e.movementY instead
-    if (mouseHold.value) {
+  const draw = (e) => {
+    if (state.value === State.DRAW) {
       const diffX = Math.abs(e.offsetX - startLeft.value)
       if (e.offsetX < startLeft.value) {
         parkSlot.value.left = `${e.offsetX}px`
@@ -65,23 +58,26 @@
     }
   }
 
-  const dragging = (e) => {
-    isDragging.value = true
-  }
-
-  const dragend =(e) => {
-    isDragging.value = false
-  }
-
-  const changePos = (e) => {
-    if(isDragging.value) {
-      const pos = [e.movementX, e.movementY]
-      const left = getIntPx(parkSlot.value.left)
-      const top = getIntPx(parkSlot.value.top)
-      parkSlot.value.left = `${left + pos[0]}px`
-      parkSlot.value.top = `${top + pos[1]}px`
+  const drawDone = (e) => {
+    if(state.value === State.DRAW) {
+      slotGroup.value.push({
+        startX: getIntPx(parkSlot.value.left),
+        startY: getIntPx(parkSlot.value.top),
+        slotWidth: getIntPx(parkSlot.value.width),
+        slotHeight: getIntPx(parkSlot.value.height)
+      })
+      
+      state.value = State.EDIT_SLOTGROUP
+      parkSlot.value.width = "0px"
+      parkSlot.value.height = "0px"
     }
   }
+
+
+  const resetState = () => {
+    state.value = State.INIT
+  }
+
 
   onMounted(() => {
     const fpimg = sessionStorage.getItem("fpimg")
@@ -89,8 +85,6 @@
     sessionStorage.removeItem("fpimg")
   })
 
-
-//          draggable="true"
 </script>
 <template>
   <div>
@@ -102,18 +96,20 @@
         class='img-overlay'
         :style="{width:'752px',height:'615px'}"
           v-on:mousedown="drawStart"
-          v-on:mousemove="mouseMove"
-          v-on:mouseup="drawFinish"
+          v-on:mousemove="draw"
+          v-on:mouseup="drawDone"
         >
-        <div class="divtest"
+        <div 
+          class="draw-slot"
           :style="parkSlot"
-          v-on:mousedown="dragging"
-          v-on:mouseup="dragend"
-          v-on:mousemove="changePos"
-          v-on:mouseout="dragend"
           >
-
         </div>
+        
+        <ParkingCreateSlotArray
+          v-for="item in slotGroup"
+          v-bind="item"
+          @doneEdit="resetState"
+        />
       </div>
       <img :src="VITE_PARKING_FLOORPLAN" alt=""
         :width="imgW" :height="imgH"
@@ -132,13 +128,8 @@
     z-index: 10;
   }
 
-  .divtest {
+  .draw-slot {
     position: absolute;
     background-color: blue;
-/*     pointer-events: none; */
-/*     width: 24px; */
-/*     height: 24px; */
-/*     top: 0; */
-/*     left: 0; */
   }
 </style>
